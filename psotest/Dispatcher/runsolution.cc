@@ -8,10 +8,10 @@ bool Dispatcher::runSolution()
 	/* Calculate maximum possible distance */
 	double ddmax = 0;
 	
-	for (int i = 0; i < dispatch.boundaries_size(); ++i)
+	for (int i = 0; i < dispatch.parameters_size(); ++i)
 	{
-		WorkerRequest::Dispatch::Boundary const &boundary = dispatch.boundaries(i);
-		double mm = boundary.max() - boundary.min();
+		WorkerRequest::Dispatch::Parameter const &parameter = dispatch.parameters(i);
+		double mm = parameter.max() - parameter.min();
 		
 		ddmax += mm * mm;
 	}
@@ -23,9 +23,9 @@ bool Dispatcher::runSolution()
 	{
 		double fitness = 0;
 		
-		for (int i = 0; i < dispatch.solution_size(); ++i)
+		for (int i = 0; i < dispatch.parameters_size(); ++i)
 		{
-			double dd = solutions[j][i] - dispatch.solution(i);
+			double dd = solutions[j][i] - dispatch.parameters(i).value();
 			fitness += dd * dd;
 		}
 		

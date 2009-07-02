@@ -5,7 +5,7 @@ vector<vector<double> > Dispatcher::extractSolutions()
 	/* Get 'solutions' setting if any */
 	string str;
 	
-	size_t numbounds = request().boundaries_size();
+	size_t numbounds = request().parameters_size();
 
 	vector<vector<double> > empty;
 	vector<double> items(numbounds, 0);
