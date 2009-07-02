@@ -1,0 +1,4 @@
+#& -l -I. --args '-fPIC -g -Wall -Werror -O2'
+
+glibmm.h	`pkg-config --libs --cflags glibmm-2.4`
+dispatcher/Webots/webots.hh	`pkg-config --libs --cflags liboptimization-dispatcher-0.1`
