@@ -11,9 +11,10 @@ bool Dispatcher::runSolution()
 	for (int i = 0; i < dispatch.parameters_size(); ++i)
 	{
 		WorkerRequest::Dispatch::Parameter const &parameter = dispatch.parameters(i);
-		double mm = parameter.max() - parameter.min();
+		double mma = parameter.max() * parameter.max();
+		double mmi = parameter.min() * parameter.min();
 		
-		ddmax += mm * mm;
+		ddmax += math::max(mma, mmi);
 	}
 	
 	ddmax = ::sqrt(ddmax);

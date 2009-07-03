@@ -3,6 +3,7 @@
 #include <cmath>
 #include <common/common.hh>
 #include <base/base.hh>
+#include <math/math.hh>
 
 using namespace std;
 using namespace psotest;
