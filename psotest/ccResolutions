@@ -3,3 +3,4 @@
 dispatcher/Dispatcher/dispatcher.hh	`pkg-config --cflags --libs liboptimization-dispatcher-0.1`
 common/common.hh	`pkg-config --cflags --libs liboptimization-common-0.1`
 base/base.hh	`pkg-config --cflags --libs libjessevdk-base-0.1`
+math/math.hh	`pkg-config --cflags --libs libjessevdk-math-0.1`
