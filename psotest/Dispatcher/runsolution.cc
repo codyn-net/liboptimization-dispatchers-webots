@@ -41,7 +41,11 @@ bool Dispatcher::runSolution()
 	WorkerResponse response;
 	
 	response.set_id(0);
-	response.add_fitness(finalfitness);
+	
+	WorkerResponse::Fitness *f = response.add_fitness();
+	f->set_name("fitness");
+	f->set_value(finalfitness);
+
 	response.set_status(WorkerResponse::Success);
 
 	writeResponse(response);
