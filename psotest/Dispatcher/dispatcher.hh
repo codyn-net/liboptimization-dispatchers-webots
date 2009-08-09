@@ -1,11 +1,11 @@
 #ifndef __PSOTEST_DISPATCHER_H__
 #define __PSOTEST_DISPATCHER_H__
 
-#include <dispatcher/Dispatcher/dispatcher.hh>
+#include <optimization/Dispatcher/dispatcher.hh>
 
 namespace psotest
 {
-	class Dispatcher : public worker::dispatcher::Dispatcher
+	class Dispatcher : public optimization::Dispatcher
 	{
 		public:
 			bool runSolution();

@@ -3,14 +3,14 @@
 bool Dispatcher::runSolution() 
 {
 	vector<vector<double> > solutions = extractSolutions();
-	WorkerRequest::Dispatch const &dispatch = request();
+	worker::Request::Dispatch const &dispatch = request();
 
 	/* Calculate maximum possible distance */
 	double ddmax = 0;
 	
 	for (int i = 0; i < dispatch.parameters_size(); ++i)
 	{
-		WorkerRequest::Dispatch::Parameter const &parameter = dispatch.parameters(i);
+		worker::Request::Dispatch::Parameter const &parameter = dispatch.parameters(i);
 		double mma = parameter.max() * parameter.max();
 		double mmi = parameter.min() * parameter.min();
 		
@@ -38,15 +38,15 @@ bool Dispatcher::runSolution()
 		}
 	}
 	
-	WorkerResponse response;
+	worker::Response response;
 	
 	response.set_id(0);
 	
-	WorkerResponse::Fitness *f = response.add_fitness();
+	worker::Response::Fitness *f = response.add_fitness();
 	f->set_name("fitness");
 	f->set_value(finalfitness);
 
-	response.set_status(WorkerResponse::Success);
+	response.set_status(worker::Response::Success);
 
 	writeResponse(response);
 	return true;

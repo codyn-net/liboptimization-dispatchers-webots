@@ -1,8 +1,8 @@
-#include <dispatcher/Webots/webots.hh>
+#include "Dispatcher/dispatcher.hh"
 
 int main (int argc, char const* argv[])
 {
-	worker::dispatcher::Webots webots;
+	webots::Dispatcher webots;
 	
 	if (webots.run())
 	{

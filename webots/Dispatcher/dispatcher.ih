@@ -1,0 +1,16 @@
+#include "dispatcher.hh"
+
+#include <os/Environment/environment.hh>
+#include <os/FileSystem/filesystem.hh>
+#include <common/Messages/messages.hh>
+#include <glibmm.h>
+#include <base/String/string.hh>
+#include <signal.h>
+
+using namespace std;
+using namespace webots;
+using namespace os;
+using namespace network;
+using namespace common;
+using namespace common::messages;
+using namespace base;
