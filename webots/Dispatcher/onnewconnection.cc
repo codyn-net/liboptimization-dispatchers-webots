@@ -7,7 +7,7 @@ bool Dispatcher::onNewConnection(network::Client &connection)
 	/* Send it the request */
 	string serialized;
 
-	if (Messages::create(request(), serialized))
+	if (optimization::Messages::create(request(), serialized))
 		connection.write(serialized);
 	
 	return false;

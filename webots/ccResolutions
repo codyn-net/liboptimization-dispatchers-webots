@@ -1,11 +1,11 @@
 #& -l -I. --args "-fPIC -g -Wall -Werror -O2 -I$PACKETEER_INSTALL_PATH/include"
 
 glibmm.h	`pkg-config --libs --cflags glibmm-2.4`
-optimization/Dispatcher/dispatcher.hh	`pkg-config --libs --cflags liboptimization-optimization-0.1`
+optimization/Dispatcher/dispatcher.hh	`pkg-config --libs --cflags liboptimization-0.1`
 network/Client/client.hh	`pkg-config --libs --cflags libjessevdk-network-0.1`
 network/UnixServer/unixserver.hh	`pkg-config --libs --cflags libjessevdk-network-0.1`
 base/String/string.hh	`pkg-config --libs --cflags libjessevdk-base-0.1`
-common/Messages/messages.hh	`pkg-config --libs --cflags liboptimization-common-0.1`
+optimization/Messages/messages.hh	`pkg-config --libs --cflags liboptimization-0.1`
 os/Environment/environment.hh	`pkg-config --libs --cflags libjessevdk-os-0.1`
 os/FileSystem/filesystem.hh	`pkg-config --libs --cflags libjessevdk-os-0.1`
 signal.h	

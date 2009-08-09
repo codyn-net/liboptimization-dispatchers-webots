@@ -2,11 +2,15 @@
 
 bool Dispatcher::runSolution() 
 {
-	WorkerResponse response;
+	worker::Response response;
 	
 	response.set_id(0);
-	response.add_fitness(0);
-	response.set_status(WorkerResponse::Success);
+	
+	worker::Response::Fitness *fitness = response.add_fitness();
+	fitness->set_name("fitness");
+	fitness->set_value(0);
+
+	response.set_status(worker::Response::Success);
 
 	writeResponse(response);
 	return true;

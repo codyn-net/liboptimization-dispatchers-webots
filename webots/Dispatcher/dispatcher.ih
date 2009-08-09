@@ -2,7 +2,7 @@
 
 #include <os/Environment/environment.hh>
 #include <os/FileSystem/filesystem.hh>
-#include <common/Messages/messages.hh>
+#include <optimization/Messages/messages.hh>
 #include <glibmm.h>
 #include <base/String/string.hh>
 #include <signal.h>
@@ -11,6 +11,5 @@ using namespace std;
 using namespace webots;
 using namespace os;
 using namespace network;
-using namespace common;
-using namespace common::messages;
+using namespace optimization::messages;
 using namespace base;

@@ -1,11 +1,11 @@
 #include "dispatcher.hh"
 
 #include <cmath>
-#include <common/common.hh>
 #include <base/base.hh>
 #include <math/math.hh>
+#include <optimization/Messages/messages.hh>
 
 using namespace std;
 using namespace psotest;
-using namespace common::messages;
+using namespace optimization::messages;
 using namespace base;

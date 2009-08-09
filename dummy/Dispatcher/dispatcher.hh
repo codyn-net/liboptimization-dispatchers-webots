@@ -1,11 +1,11 @@
 #ifndef __DUMMY_DISPATCHER_H__
 #define __DUMMY_DISPATCHER_H__
 
-#include <dispatcher/Dispatcher/dispatcher.hh>
+#include <optimization/Dispatcher/dispatcher.hh>
 
 namespace dummy
 {
-	class Dispatcher : public worker::dispatcher::Dispatcher
+	class Dispatcher : public optimization::Dispatcher
 	{
 		public:
 			bool runSolution();

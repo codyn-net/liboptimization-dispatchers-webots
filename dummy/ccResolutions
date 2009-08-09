@@ -1,5 +1,5 @@
 #& -l -I. --args '-g -Wall -Werror -fPIC'
 
-dispatcher/Dispatcher/dispatcher.hh	`pkg-config --cflags --libs liboptimization-dispatcher-0.1`
-common/common.hh	`pkg-config --cflags --libs liboptimization-common-0.1`
+optimization/Dispatcher/dispatcher.hh	`pkg-config --cflags --libs liboptimization-0.1`
+optimization/Messages/messages.hh	`pkg-config --cflags --libs liboptimization-0.1`
 base/base.hh	`pkg-config --cflags --libs libjessevdk-base-0.1`

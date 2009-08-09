@@ -2,10 +2,10 @@
 
 bool Dispatcher::onData(os::FileDescriptor::DataArgs &args) 
 {
-	vector<common::messages::worker::Response> response;
-	vector<common::messages::worker::Response>::iterator iter;
+	vector<worker::Response> response;
+	vector<worker::Response>::iterator iter;
 	
-	Messages::extract(args, response);
+	optimization::Messages::extract(args, response);
 	
 	for (iter = response.begin(); iter != response.end(); ++iter)
 	{
