@@ -9,7 +9,7 @@ update:
 clean:
 	ccbuild distclean
 
-INSTALLDIR=$(PACKETEER_INSTALL_PATH)/libexec/liboptimization-dispatcher-0.1/dispatchers/webots
+INSTALLDIR=$(PACKETEER_INSTALL_PATH)/libexec/liboptimization-dispatcher-0.1/dispatchers
 
 install: all
 	install -D webots "${INSTALLDIR}/webots"
