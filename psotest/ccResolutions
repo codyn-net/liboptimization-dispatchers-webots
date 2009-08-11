@@ -1,4 +1,4 @@
-#& -l -I. --args '-g -Wall -Werror -fPIC'
+#& -l -I. --args "-g -Wall -Werror -fPIC -I$PACKETEER_INSTALL_PATH/include"
 
 optimization/Dispatcher/dispatcher.hh	`pkg-config --cflags --libs liboptimization-0.1`
 base/base.hh	`pkg-config --cflags --libs libjessevdk-0.1`
