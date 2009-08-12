@@ -9,7 +9,7 @@ update:
 clean:
 	ccbuild clean
 
-INSTALLDIR=$(PACKETEER_INSTALL_PATH)/libexec/liboptimization-dispatcher-0.1/dispatchers
+INSTALLDIR=$(PACKETEER_INSTALL_PATH)/libexec/liboptimization-dispatchers-0.1
 
 install: all
 	install -D psotest "${INSTALLDIR}/psotest"
