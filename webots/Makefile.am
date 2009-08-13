@@ -12,7 +12,6 @@ webots_SOURCES = \
 	Dispatcher/destructor.cc \
 	Dispatcher/killwebots.cc \
 	Dispatcher/mode.cc \
-	Dispatcher/nodisplay.cc \
 	Dispatcher/ondata.cc \
 	Dispatcher/onnewconnection.cc \
 	Dispatcher/ontimeout.cc \

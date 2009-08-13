@@ -22,7 +22,6 @@ namespace webots
 			virtual bool runSolution();
 		protected:
 			virtual std::string webotsPath() const;
-			virtual bool noDisplay() const;
 			virtual bool mode(std::string &m) const;
 			virtual bool timeout(size_t &tm) const;
 			

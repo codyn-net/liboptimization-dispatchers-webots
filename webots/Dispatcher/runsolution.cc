@@ -19,19 +19,39 @@ bool Dispatcher::runSolution()
 		return false;
 	}
 
-	if (noDisplay())
-		argv.push_back("--batch");
+	string md;
 
-	string mode;
-
-	if (this->mode(mode))
-		argv.push_back(mode);
-	
-	string world;
-
-	if (this->world(world))
+	if (mode(md))
 	{
-		argv.push_back(world);
+		if (md == "" || md == "run")
+		{
+			argv.push_back("--mode=run");
+		}
+		else if (md == "fast")
+		{
+			argv.push_back("--mode=fast");
+		}
+		else if (md == "batch")
+		{
+			argv.push_back("--batch");
+			argv.push_back("--mode=fast");
+		}
+		else if (md == "minimize")
+		{
+			argv.push_back("--minimize");
+			argv.push_back("--mode=fast");
+		}
+	}
+	else
+	{
+		argv.push_back("--mode=run");
+	}
+	
+	string wd;
+
+	if (world(wd))
+	{
+		argv.push_back(wd);
 	}
 	else
 	{
@@ -42,8 +62,10 @@ bool Dispatcher::runSolution()
 	int f = Glib::file_open_tmp(d_socketFile, "optimization");
 	
 	if (f == -1)
+	{
 		return false;
-	
+	}
+
 	::close(f);
 	::unlink(d_socketFile.c_str());
 
