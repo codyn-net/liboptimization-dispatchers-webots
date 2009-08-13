@@ -6,6 +6,9 @@
 #include <glibmm.h>
 #include <base/String/string.hh>
 #include <signal.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 using namespace std;
 using namespace webots;

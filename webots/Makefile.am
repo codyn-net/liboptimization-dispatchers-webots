@@ -20,7 +20,8 @@ webots_SOURCES = \
 	Dispatcher/runsolution.cc \
 	Dispatcher/timeout.cc \
 	Dispatcher/webotspath.cc \
-	Dispatcher/world.cc
+	Dispatcher/world.cc \
+	Dispatcher/resolvewebotsexecutable.cc
 
 webots_LDFLAGS = $(PACKAGE_DISPATCHERS_LIBS)
 

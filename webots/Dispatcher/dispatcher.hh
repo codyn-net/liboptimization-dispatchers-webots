@@ -36,6 +36,8 @@ namespace webots
 
 			bool onData(os::FileDescriptor::DataArgs &args);
 			bool onNewConnection(network::Client &connection);
+
+			std::string resolveWebotsExecutable(std::string const &path);
 	};
 }
 

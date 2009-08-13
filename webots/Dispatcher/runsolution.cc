@@ -11,6 +11,14 @@ bool Dispatcher::runSolution()
 	else
 		argv.push_back("webots");
 	
+	path = resolveWebotsExecutable(path);
+	
+	if (path == "")
+	{
+		cerr << "Could not find webots executable" << endl;
+		return false;
+	}
+
 	if (noDisplay())
 		argv.push_back("--batch");
 
