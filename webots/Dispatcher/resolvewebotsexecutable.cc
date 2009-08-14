@@ -6,6 +6,7 @@ string Dispatcher::resolveWebotsExecutable(std::string const &path)
 
 	if (ret == "")
 	{
+		cerr << "Could not find webots executable: " << path << endl;
 		return ret;
 	}
 
@@ -20,18 +21,25 @@ string Dispatcher::resolveWebotsExecutable(std::string const &path)
 
 	if (stat(ret.c_str(), &buf) != 0)
 	{
+		cerr << "Webots executable does not exist: "  << ret << endl;
 		return "";
 	}
 
 	struct passwd *pwd = getpwuid(getuid());
 	string homedir = pwd->pw_dir;
 
-	if (buf.st_uid == getuid() && String(ret).startsWith(homedir))
+	if (buf.st_uid != getuid())
 	{
-		return ret;
+		cerr << "Custom webots executable is not owned by the used" << endl;
+		return "";
+	}
+	else if (String(ret).startsWith(homedir))
+	{
+		cerr << "Custom webots executable is not in user home directory" << endl;
+		return "";
 	}
 	else
 	{
-		return "";
+		return ret;
 	}
 }

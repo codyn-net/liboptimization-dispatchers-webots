@@ -7,5 +7,5 @@ string Dispatcher::webotsPath() const
 	if (setting("webotsPath", val))
 		return val;
 	
-	return "";
+	return "webots";
 }

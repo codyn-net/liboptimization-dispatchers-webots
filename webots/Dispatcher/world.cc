@@ -6,6 +6,7 @@ bool Dispatcher::world(string &w) const
 
 	if (!setting("world", set))
 	{
+		cerr << "Webots world is not set, please provide the path to the webots world file in the dispatcher settings..." << endl;
 		return false;
 	}
 
@@ -13,6 +14,7 @@ bool Dispatcher::world(string &w) const
 	
 	if (!FileSystem::realpath(set, resolved))
 	{
+		cerr << "Webots world could not be found: " << set << endl;
 		return false;
 	}
 
@@ -21,19 +23,26 @@ bool Dispatcher::world(string &w) const
 
 	if (stat(resolved.c_str(), &buf) != 0)
 	{
+		cerr << "Webots world could not be found: " << set << endl;
 		return false;
 	}
 
 	struct passwd *pw = getpwuid(getuid());
 	string home = pw->pw_dir;
 
-	if (buf.st_uid == getuid() && String(resolved).startsWith(home))
+	if (buf.st_uid != getuid())
 	{
-		w = resolved;
-		return true;
+		cerr << "Webots world is not owned by the user" << endl;
+		return false;
+	}
+	else if (String(resolved).startsWith(home))
+	{
+		cerr << "Webots world is not in user home directory" << endl;
+		return false;
 	}
 	else
 	{
-		return false;
+		w = resolved;
+		return true;
 	}
 }

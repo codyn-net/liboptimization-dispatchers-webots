@@ -16,6 +16,7 @@ namespace webots
 		std::string d_tmpHome;
 
 		public:
+			Dispatcher();
 			~Dispatcher();
 
 			/* Public functions */

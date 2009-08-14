@@ -6,11 +6,6 @@ bool Dispatcher::runSolution()
 	vector<string> argv;
 	string path = webotsPath();
 	
-	if (path != "")
-		argv.push_back(path);
-	else
-		argv.push_back("webots");
-	
 	path = resolveWebotsExecutable(path);
 	
 	if (path == "")
@@ -18,7 +13,8 @@ bool Dispatcher::runSolution()
 		cerr << "Could not find webots executable" << endl;
 		return false;
 	}
-
+	
+	argv.push_back(path);
 	string md;
 
 	if (mode(md))
@@ -55,7 +51,6 @@ bool Dispatcher::runSolution()
 	}
 	else
 	{
-		cerr << "** [Dispatcher] Webots world is not set, please provide the path to the webots world file in the dispatcher settings..." << endl;
 		return false;
 	}
 	
@@ -142,7 +137,7 @@ bool Dispatcher::runSolution()
 	}
 	catch (Glib::SpawnError &e)
 	{
-		cerr << "** [Dispatcher] Error while spawning webots: " << e.what() << endl;
+		cerr << "Error while spawning webots: " << e.what() << endl;
 		return false;
 	}
 	
