@@ -1,0 +1,5 @@
+liboptimization0-dispatchers (0.1-1) $DIST; urgency=low
+
+  * Initial release
+
+ -- Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>  Mon, 17 Aug 2009 09:12:35 +0200
