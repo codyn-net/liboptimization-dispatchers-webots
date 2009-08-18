@@ -1,4 +1,4 @@
-AC_INIT(liboptimization-dispatchers-webots, 0.1)
+AC_INIT(liboptimization-dispatchers-webots, 0.2)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 

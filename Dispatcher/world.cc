@@ -3,6 +3,7 @@
 bool Dispatcher::world(string &w) const
 {
 	string set;
+	Config &config = Config::instance();
 
 	if (!setting("world", set))
 	{
@@ -27,17 +28,23 @@ bool Dispatcher::world(string &w) const
 		return false;
 	}
 
+	if (!config.secure)
+	{
+		w = resolved;
+		return true;
+	}
+
 	struct passwd *pw = getpwuid(getuid());
 	string home = pw->pw_dir;
 
 	if (buf.st_uid != getuid())
 	{
-		cerr << "Webots world is not owned by the user" << endl;
+		cerr << "Webots world is not owned by the user: " << resolved << endl;
 		return false;
 	}
 	else if (!String(resolved).startsWith(home))
 	{
-		cerr << "Webots world is not in user home directory" << endl;
+		cerr << "Webots world is not in user home directory: " << resolved << endl;
 		return false;
 	}
 	else

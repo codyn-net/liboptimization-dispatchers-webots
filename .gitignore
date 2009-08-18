@@ -1,0 +1,17 @@
+*.o
+*.lo
+*.Po
+autom4te.cache
+aclocal.m4
+config.*
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4
+Makefile
+Makefile.in
+missing
+webots
+stamp-h1
