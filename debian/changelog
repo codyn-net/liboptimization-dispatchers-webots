@@ -1,3 +1,9 @@
+liboptimization0-dispatchers-webots (0.2-1) $DIST; urgency=low
+
+  * New upstream release 0.2
+
+ -- Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>  Tue, 18 Aug 2009 22:21:30 +0200
+
 liboptimization0-dispatchers-webots (0.1-1) $DIST; urgency=low
 
   * Initial release
