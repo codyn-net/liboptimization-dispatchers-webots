@@ -1,4 +1,4 @@
-Source: liboptimization0-dispatchers
+Source: liboptimization0-dispatchers-webots
 Priority: extra
 Maintainer: Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>
 Build-Depends: debhelper (>= 7),
@@ -10,13 +10,6 @@ Standards-Version: 3.8.0
 Section: science
 Homepage: http://birg.epfl.ch
 
-Package: liboptimization0-dispatchers
-Section: science
-Architecture: any
-Depends: liboptimization0-dispatchers-webots
-Description: Optimization dispatchers
- Optimization dispatchers meta package
- 
 Package: liboptimization0-dispatchers-webots
 Section: science
 Architecture: any
