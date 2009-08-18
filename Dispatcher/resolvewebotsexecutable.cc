@@ -30,12 +30,12 @@ string Dispatcher::resolveWebotsExecutable(std::string const &path)
 
 	if (buf.st_uid != getuid())
 	{
-		cerr << "Custom webots executable is not owned by the used" << endl;
+		cerr << "Custom webots executable is not owned by the user: " << ret << endl;
 		return "";
 	}
 	else if (!String(ret).startsWith(homedir))
 	{
-		cerr << "Custom webots executable is not in user home directory" << endl;
+		cerr << "Custom webots executable is not in user home directory: " << ret << endl;
 		return "";
 	}
 	else
