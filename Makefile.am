@@ -46,4 +46,4 @@ confex_DATA = webots.conf.ex
 
 EXTRA_DIST = \
 	$(NO_INST_HFILES) \
-	confex_DATA
+	$(confex_DATA)
