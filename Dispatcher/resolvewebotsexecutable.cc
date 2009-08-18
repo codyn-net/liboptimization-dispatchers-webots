@@ -33,7 +33,7 @@ string Dispatcher::resolveWebotsExecutable(std::string const &path)
 		cerr << "Custom webots executable is not owned by the used" << endl;
 		return "";
 	}
-	else if (String(ret).startsWith(homedir))
+	else if (!String(ret).startsWith(homedir))
 	{
 		cerr << "Custom webots executable is not in user home directory" << endl;
 		return "";

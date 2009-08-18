@@ -1,4 +1,4 @@
-AC_INIT(dispatchers, 0.1)
+AC_INIT(liboptimization-dispatchers-webots, 0.1)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
@@ -24,7 +24,4 @@ AC_SUBST(PACKAGE_DISPATCHERS_LIBS)
 
 AC_OUTPUT(
 Makefile
-dummy/Makefile
-webots/Makefile
-psotest/Makefile
 )

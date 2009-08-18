@@ -35,7 +35,7 @@ bool Dispatcher::world(string &w) const
 		cerr << "Webots world is not owned by the user" << endl;
 		return false;
 	}
-	else if (String(resolved).startsWith(home))
+	else if (!String(resolved).startsWith(home))
 	{
 		cerr << "Webots world is not in user home directory" << endl;
 		return false;
