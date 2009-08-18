@@ -3,10 +3,16 @@
 string Dispatcher::resolveWebotsExecutable(std::string const &path)
 {
 	string ret = Glib::find_program_in_path(path);
+	Config &config = Config::instance();
 
 	if (ret == "")
 	{
 		cerr << "Could not find webots executable: " << path << endl;
+		return ret;
+	}
+	
+	if (!config.secure)
+	{
 		return ret;
 	}
 

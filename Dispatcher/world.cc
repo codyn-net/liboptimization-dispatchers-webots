@@ -3,6 +3,7 @@
 bool Dispatcher::world(string &w) const
 {
 	string set;
+	Config &config = Config::instance();
 
 	if (!setting("world", set))
 	{
@@ -25,6 +26,12 @@ bool Dispatcher::world(string &w) const
 	{
 		cerr << "Webots world could not be found: " << set << endl;
 		return false;
+	}
+
+	if (!config.secure)
+	{
+		w = resolved;
+		return true;
 	}
 
 	struct passwd *pw = getpwuid(getuid());
