@@ -3,12 +3,12 @@ INCLUDES = \
 	-I$(top_builddir) \
 	-I$(srcdir) \
 	$(PACKAGE_DISPATCHERS_CFLAGS) \
-    -DDATADIR=\""$(datadir)"\" \
-    -DLIBDIR=\""$(libdir)"\" \
-    -DCONFDIR=\""$(sysconfdir)"\" \
-    -DPREFIXDIR=\""$(prefix)"\" \
-    -DPKGDATADIR=\""$(pkgdatadir)"\" \
-    -DPKGLIBDIR=\""$(pkglibdir)"\"
+	-DDATADIR=\""$(datadir)"\" \
+	-DLIBDIR=\""$(libdir)"\" \
+	-DCONFDIR=\""$(sysconfdir)"\" \
+	-DPREFIXDIR=\""$(prefix)"\" \
+	-DPKGDATADIR=\""$(pkgdatadir)"\" \
+	-DPKGLIBDIR=\""$(pkglibdir)"\"
 
 dispdir = $(prefix)/libexec/liboptimization-dispatchers-0.1
 disp_PROGRAMS = webots

@@ -1,1 +1,2 @@
-usr/libexec/liboptimization-dispatchers-*/webots
+usr/share/liboptimization-dispatchers-webots/webots.conf.ex
+usr/libexec/liboptimization-dispatchers-0.1/webots
