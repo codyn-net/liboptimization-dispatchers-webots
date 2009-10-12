@@ -1,7 +1,7 @@
 #ifndef __WEBOTS_DISPATCHER_H__
 #define __WEBOTS_DISPATCHER_H__
 
-#include <optimization/Dispatcher/dispatcher.hh>
+#include <optimization/dispatcher.hh>
 #include <network/UnixServer/unixserver.hh>
 #include <network/Client/client.hh>
 
@@ -20,24 +20,24 @@ namespace webots
 			~Dispatcher();
 
 			/* Public functions */
-			virtual bool runSolution();
+			virtual bool RunSolution();
 		protected:
-			virtual std::string webotsPath() const;
-			virtual bool mode(std::string &m) const;
-			virtual bool timeout(size_t &tm) const;
+			virtual std::string WebotsPath() const;
+			virtual bool Mode(std::string &m) const;
+			virtual bool Timeout(size_t &tm) const;
 			
-			virtual bool world(std::string &w) const;
+			virtual bool World(std::string &w) const;
 			
 		private:
 			/* Private functions */
-			void killWebots();
-			void onWebotsKilled(GPid pid, int ret);
-			bool onTimeout();
+			void KillWebots();
+			void OnWebotsKilled(GPid pid, int ret);
+			bool OnTimeout();
 
-			bool onData(os::FileDescriptor::DataArgs &args);
-			bool onNewConnection(network::Client &connection);
+			bool OnData(os::FileDescriptor::DataArgs &args);
+			bool OnNewConnection(network::Client &connection);
 
-			std::string resolveWebotsExecutable(std::string const &path);
+			std::string ResolveWebotsExecutable(std::string const &path);
 	};
 }
 

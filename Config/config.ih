@@ -1,4 +1,0 @@
-#include "config.hh"
-
-using namespace std;
-using namespace webots;

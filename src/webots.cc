@@ -1,10 +1,10 @@
-#include "Dispatcher/dispatcher.hh"
+#include "dispatcher.hh"
 
 int main (int argc, char const* argv[])
 {
 	webots::Dispatcher webots;
 	
-	if (webots.run())
+	if (webots.Run())
 	{
 		return 0;
 	}

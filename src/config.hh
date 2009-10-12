@@ -11,11 +11,11 @@ namespace webots
 		static Config *s_instance;
 
 		public:
-			bool secure;
+			bool Secure;
 			
 			/* Constructor/destructor */
-			static Config &initialize(std::string const &filename);
-			static Config &instance();
+			static Config &Initialize(std::string const &filename);
+			static Config &Instance();
 		
 			/* Public functions */
 		private:
