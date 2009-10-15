@@ -20,7 +20,7 @@ namespace webots
 			~Dispatcher();
 
 			/* Public functions */
-			virtual bool RunSolution();
+			virtual bool RunTask();
 		protected:
 			virtual std::string WebotsPath() const;
 			virtual bool Mode(std::string &m) const;

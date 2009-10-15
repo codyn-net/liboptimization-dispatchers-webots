@@ -201,7 +201,7 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 }
 
 bool
-Dispatcher::RunSolution() 
+Dispatcher::RunTask() 
 {
 	// Launch webots
 	vector<string> argv;
