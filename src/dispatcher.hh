@@ -21,6 +21,7 @@ namespace webots
 
 			/* Public functions */
 			virtual bool RunTask();
+			virtual void Stop();
 		protected:
 			virtual std::string WebotsPath() const;
 			virtual bool Mode(std::string &m) const;

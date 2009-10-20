@@ -46,6 +46,13 @@ Dispatcher::~Dispatcher()
 	KillWebots();
 }
 
+void
+Dispatcher::Stop()
+{
+	KillWebots();
+	optimization::Dispatcher::Stop();
+}
+
 Dispatcher::Dispatcher()
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-0.1/webots.conf");
