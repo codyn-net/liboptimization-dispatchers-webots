@@ -54,15 +54,25 @@ Dispatcher::Stop()
 }
 
 Dispatcher::Dispatcher()
+:
+	d_pid(0),
+	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-0.1/webots.conf");
-
-	d_pid = 0;
 }
 
 void
 Dispatcher::KillWebots()
 {
+	if (d_pidBuilder != 0)
+	{
+		::kill(d_pidBuilder, SIGTERM);
+		usleep(50000);
+
+		::kill(d_pidBuilder, SIGKILL);
+		d_pidBuilder = 0;
+	}
+
 	if (d_pid == 0)
 	{
 		return;
@@ -156,6 +166,30 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 	FileSystem::remove(d_socketFile);
 }
 
+void
+Dispatcher::OnBuilderKilled(GPid pid, int ret) 
+{
+	Glib::spawn_close_pid(pid);
+	
+	if (d_pidBuilder == 0)
+	{
+		return;
+	}
+	
+	d_pidBuilder = 0;
+	
+	if (!LaunchWebots())
+	{
+		d_server.close();
+
+		// Cleanup temporary directory
+		FileSystem::remove(d_tmpHome, true);
+		FileSystem::remove(d_socketFile);
+
+		Main()->quit();
+	}
+}
+
 string
 Dispatcher::ResolveWebotsExecutable(std::string const &path)
 {
@@ -210,54 +244,9 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 bool
 Dispatcher::RunTask() 
 {
-	// Launch webots
-	vector<string> argv;
-	string path = WebotsPath();
-	
-	path = ResolveWebotsExecutable(path);
-	
-	if (path == "")
-	{
-		cerr << "Could not find webots executable" << endl;
-		return false;
-	}
-	
-	argv.push_back(path);
-	string md;
-
-	if (Mode(md))
-	{
-		if (md == "" || md == "run")
-		{
-			argv.push_back("--mode=run");
-		}
-		else if (md == "fast")
-		{
-			argv.push_back("--mode=fast");
-		}
-		else if (md == "batch")
-		{
-			argv.push_back("--batch");
-			argv.push_back("--mode=fast");
-		}
-		else if (md == "minimize")
-		{
-			argv.push_back("--minimize");
-			argv.push_back("--mode=fast");
-		}
-	}
-	else
-	{
-		argv.push_back("--mode=run");
-	}
-	
 	string wd;
 
 	if (World(wd))
-	{
-		argv.push_back(wd);
-	}
-	else
 	{
 		return false;
 	}
@@ -325,16 +314,172 @@ Dispatcher::RunTask()
 	d_server = UnixServer(d_socketFile);
 	
 	if (!d_server.listen())
+	{
 		return false;
+	}
 
 	d_server.onNewConnection().add(*this, &Dispatcher::OnNewConnection);
 	int serr;
+	
+	d_environment = Environment::convert(envp);
+
+	string builder;
+
+	if (ResolveBuilderPath(builder))
+	{
+		LaunchWorldBuilder(builder);
+	}
+	else
+	{
+		LaunchWebots();
+	}
+	
+	return true;
+}
+
+bool
+Dispatcher::ResolveBuilderPath(string &builder)
+{
+	string path;
+	
+	if (!Setting("worldBuilderPath", path))
+	{
+		return false;
+	}
+	
+	builder = Glib::find_program_in_path(path);
+	Config &config = Config::Instance();
+
+	if (builder == "")
+	{
+		cerr << "Could not find world builder executable: " << path << endl;
+		return false;
+	}
+	
+	if (!config.Secure)
+	{
+		return true;
+	}
+
+	// System webots is fine
+	if (String(builder).startsWith("/usr"))
+	{
+		return true;
+	}
+
+	// Otherwise, must be owned by the user, and in his/her home directory
+	struct stat buf;
+
+	if (stat(builder.c_str(), &buf) != 0)
+	{
+		cerr << "World builder executable does not exist: "  << builder << endl;
+		return false;
+	}
+
+	struct passwd *pwd = getpwuid(getuid());
+	string homedir = pwd->pw_dir;
+
+	if (buf.st_uid != getuid())
+	{
+		cerr << "World builder is not owned by the user: " << builder << endl;
+		return false;
+	}
+	else if (!String(builder).startsWith(homedir))
+	{
+		cerr << "World builder is not in user home directory: " << builder << endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool
+Dispatcher::LaunchWorldBuilder(string const &builder)
+{
+	vector<string> argv;
+	argv.push_back(builder);
+	
+	string wd;
+	World(wd);
+	argv.push_back(wd);
 
 	try
 	{
 		Glib::spawn_async_with_pipes(d_tmpHome,
 		                  argv,
-		                  Environment::convert(envp),
+		                  d_environment,
+		                  Glib::SPAWN_DO_NOT_REAP_CHILD |
+		                  Glib::SPAWN_SEARCH_PATH,
+		                  sigc::slot<void>(),
+		                  &d_pidBuilder,
+				  0,
+				  0,
+				  0);
+	}
+	catch (Glib::SpawnError &e)
+	{
+		cerr << "Error while spawning world maker: " << e.what() << endl;
+		return false;
+	}
+	
+	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnBuilderKilled), d_pidBuilder);
+}
+
+bool
+Dispatcher::LaunchWebots()
+{
+	// Launch webots
+	vector<string> argv;
+	string path = WebotsPath();
+	int serr;
+	
+	path = ResolveWebotsExecutable(path);
+	
+	if (path == "")
+	{
+		cerr << "Could not find webots executable" << endl;
+		return false;
+	}
+	
+	argv.push_back(path);
+	string md;
+
+	if (Mode(md))
+	{
+		if (md == "" || md == "run")
+		{
+			argv.push_back("--mode=run");
+		}
+		else if (md == "fast")
+		{
+			argv.push_back("--mode=fast");
+		}
+		else if (md == "batch")
+		{
+			argv.push_back("--batch");
+			argv.push_back("--mode=fast");
+		}
+		else if (md == "minimize")
+		{
+			argv.push_back("--minimize");
+			argv.push_back("--mode=fast");
+		}
+	}
+	else
+	{
+		argv.push_back("--mode=run");
+	}
+	
+	string wd;
+
+	World(wd);
+	argv.push_back(wd);
+
+	try
+	{
+		Glib::spawn_async_with_pipes(d_tmpHome,
+		                  argv,
+		                  d_environment,
 		                  Glib::SPAWN_DO_NOT_REAP_CHILD |
 		                  Glib::SPAWN_SEARCH_PATH,
 		                  sigc::slot<void>(),
@@ -358,8 +503,6 @@ Dispatcher::RunTask()
 		d_timeout = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Dispatcher::OnTimeout),
 		                                           tm * 1000);
 	}
-	
-	return true;
 }
 
 bool

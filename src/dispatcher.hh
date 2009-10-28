@@ -12,8 +12,12 @@ namespace webots
 		network::UnixServer d_server;
 		sigc::connection d_timeout;
 		Glib::Pid d_pid;
+
 		std::string d_socketFile;
 		std::string d_tmpHome;
+		std::vector<std::string> d_environment;
+
+		Glib::Pid d_pidBuilder;
 
 		public:
 			Dispatcher();
@@ -33,6 +37,12 @@ namespace webots
 			/* Private functions */
 			void KillWebots();
 			void OnWebotsKilled(GPid pid, int ret);
+			void OnBuilderKilled(GPid pid, int ret);
+			
+			bool LaunchWebots();
+			bool LaunchWorldBuilder(std::string const &builder);
+			bool ResolveBuilderPath(std::string &builder);
+			
 			bool OnTimeout();
 
 			bool OnData(os::FileDescriptor::DataArgs &args);
