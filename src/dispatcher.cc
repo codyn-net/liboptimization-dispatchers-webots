@@ -402,6 +402,8 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	string wd;
 	World(wd);
 	argv.push_back(wd);
+	
+	int sin;
 
 	try
 	{
@@ -412,7 +414,7 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 		                  Glib::SPAWN_SEARCH_PATH,
 		                  sigc::slot<void>(),
 		                  &d_pidBuilder,
-				  0,
+				  &sin,
 				  0,
 				  0);
 	}
@@ -423,6 +425,14 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	}
 	
 	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnBuilderKilled), d_pidBuilder);
+	
+	// Write task
+	string serialized;
+	optimization::Messages::Create(Request(), serialized);
+	
+	FileDescriptor ds(sin);
+	ds.write(serialized);
+	ds.close();
 }
 
 bool
