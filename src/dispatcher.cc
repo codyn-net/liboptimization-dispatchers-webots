@@ -173,6 +173,11 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 	// Cleanup temporary directory
 	FileSystem::remove(d_tmpHome, true);
 	FileSystem::remove(d_socketFile);
+	
+	if (d_builderText != "")
+	{
+		FileSystem::remove(String(d_builderText).strip());
+	}
 }
 
 void
