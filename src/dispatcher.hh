@@ -4,6 +4,7 @@
 #include <optimization/dispatcher.hh>
 #include <network/UnixServer/unixserver.hh>
 #include <network/Client/client.hh>
+#include <os/Pipe/pipe.hh>
 
 namespace webots
 {
@@ -18,6 +19,8 @@ namespace webots
 		std::vector<std::string> d_environment;
 
 		Glib::Pid d_pidBuilder;
+		os::Pipe d_builderPipe;
+		std::string d_builderText;
 
 		public:
 			Dispatcher();
@@ -47,6 +50,8 @@ namespace webots
 
 			bool OnData(os::FileDescriptor::DataArgs &args);
 			bool OnNewConnection(network::Client &connection);
+			
+			bool OnBuilderData(os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
 	};

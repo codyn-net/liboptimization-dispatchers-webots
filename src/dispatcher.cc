@@ -66,6 +66,8 @@ Dispatcher::KillWebots()
 {
 	if (d_pidBuilder != 0)
 	{
+		d_builderPipe.readEnd().close();
+
 		::kill(d_pidBuilder, SIGTERM);
 		usleep(50000);
 
@@ -118,6 +120,13 @@ Dispatcher::OnData(os::FileDescriptor::DataArgs &args)
 		}
 	}
 	
+	return false;
+}
+
+bool
+Dispatcher::OnBuilderData(os::FileDescriptor::DataArgs &args) 
+{
+	d_builderText += args.data;
 	return false;
 }
 
@@ -177,6 +186,7 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 	}
 	
 	d_pidBuilder = 0;
+	d_builderPipe.readEnd().close();
 	
 	if (!LaunchWebots())
 	{
@@ -399,12 +409,9 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	vector<string> argv;
 	argv.push_back(builder);
 	
-	string wd;
-	World(wd);
-	argv.push_back(wd);
-	
 	int sin;
-
+	int sout;
+	
 	try
 	{
 		Glib::spawn_async_with_pipes(d_tmpHome,
@@ -415,7 +422,7 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 		                  sigc::slot<void>(),
 		                  &d_pidBuilder,
 				  &sin,
-				  0,
+				  &sout,
 				  0);
 	}
 	catch (Glib::SpawnError &e)
@@ -430,9 +437,13 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	string serialized;
 	optimization::Messages::Create(Request(), serialized);
 	
-	FileDescriptor ds(sin);
-	ds.write(serialized);
-	ds.close();
+	d_builderPipe = Pipe(sout, sin);
+	d_builderPipe.readEnd().onData().add(*this, &Dispatcher::OnBuilderData);
+	
+	d_builderPipe.writeEnd().write(serialized);
+	d_builderPipe.writeEnd().close();
+
+	return true;
 }
 
 bool
