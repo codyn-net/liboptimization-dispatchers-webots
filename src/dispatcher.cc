@@ -259,13 +259,6 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 bool
 Dispatcher::RunTask() 
 {
-	string wd;
-
-	if (World(wd))
-	{
-		return false;
-	}
-	
 	int f = Glib::file_open_tmp(d_socketFile, "optimization");
 	
 	if (f == -1)
@@ -337,7 +330,6 @@ Dispatcher::RunTask()
 	int serr;
 	
 	d_environment = Environment::convert(envp);
-
 	string builder;
 
 	if (ResolveBuilderPath(builder))
@@ -452,6 +444,13 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 bool
 Dispatcher::LaunchWebots()
 {
+	string wd;
+
+	if (!World(wd))
+	{
+		return false;
+	}
+	
 	// Launch webots
 	vector<string> argv;
 	string path = WebotsPath();
@@ -494,9 +493,6 @@ Dispatcher::LaunchWebots()
 		argv.push_back("--mode=run");
 	}
 	
-	string wd;
-
-	World(wd);
 	argv.push_back(wd);
 
 	try
@@ -566,7 +562,11 @@ Dispatcher::World(string &w) const
 	string set;
 	Config &config = Config::Instance();
 
-	if (!Setting("world", set))
+	if (d_builderText != "")
+	{
+		set = String(d_builderText).strip();
+	}
+	else if (!Setting("world", set))
 	{
 		cerr << "Webots world is not set, please provide the path to the webots world file in the dispatcher settings..." << endl;
 		return false;
