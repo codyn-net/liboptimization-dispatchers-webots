@@ -177,6 +177,7 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 	if (d_builderText != "")
 	{
 		FileSystem::remove(String(d_builderText).strip());
+		FileSystem::remove("." + String(d_builderText).strip() + ".project");
 	}
 }
 
