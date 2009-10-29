@@ -342,14 +342,12 @@ Dispatcher::RunTask()
 
 	if (ResolveBuilderPath(builder))
 	{
-		LaunchWorldBuilder(builder);
+		return LaunchWorldBuilder(builder);
 	}
 	else
 	{
-		LaunchWebots();
+		return LaunchWebots();
 	}
-	
-	return true;
 }
 
 bool
@@ -529,6 +527,8 @@ Dispatcher::LaunchWebots()
 		d_timeout = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Dispatcher::OnTimeout),
 		                                           tm * 1000);
 	}
+	
+	return true;
 }
 
 bool
