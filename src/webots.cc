@@ -1,5 +1,7 @@
 #include "dispatcher.hh"
 
+#include <signal.h>
+
 webots::Dispatcher dispatcher_webots;
 
 static void
