@@ -69,11 +69,14 @@ Dispatcher::KillWebots()
 		d_builderPipe.readEnd().close();
 
 		// Kill whole process group
-		::kill(-d_pidBuilder, SIGTERM);
+		::kill(-(int)d_pidBuilder, SIGTERM);
+		::kill(d_pidBuilder, SIGTERM);
 		usleep(200000);
 
 		// Kill whole process group
-		::kill(-d_pidBuilder, SIGKILL);
+		::kill(-(int)d_pidBuilder, SIGKILL);
+		::kill(d_pidBuilder, SIGKILL);
+
 		d_pidBuilder = 0;
 	}
 
@@ -85,11 +88,13 @@ Dispatcher::KillWebots()
 	cerr << "Killing webots ourselves" << endl;
 
 	// Kill whole process group nicely first
-	::kill(-d_pid, SIGTERM);
+	::kill(-(int)d_pid, SIGTERM);
+	::kill(d_pid, SIGTERM);
 	usleep(200000);
 	
 	// Then just kill it
-	::kill(-d_pid, SIGKILL);
+	::kill(-(int)d_pid, SIGKILL);
+	::kill(d_pid, SIGKILL);
 
 	OnWebotsKilled(d_pid, 0);
 }
