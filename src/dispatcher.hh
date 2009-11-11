@@ -32,7 +32,6 @@ namespace webots
 		protected:
 			virtual std::string WebotsPath() const;
 			virtual bool Mode(std::string &m) const;
-			virtual bool Timeout(size_t &tm) const;
 			
 			virtual bool World(std::string &w) const;
 			

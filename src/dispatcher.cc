@@ -526,31 +526,6 @@ Dispatcher::LaunchWebots()
 	}
 	
 	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid);
-
-	/* Install timeout */
-	size_t tm;
-	if (Timeout(tm) && tm > 0)
-	{
-		d_timeout = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Dispatcher::OnTimeout),
-		                                           tm * 1000);
-	}
-	
-	return true;
-}
-
-bool
-Dispatcher::Timeout(size_t &tm) const
-{
-	string val;
-	
-	if (!Setting("timeout", val))
-		return false;
-	
-	stringstream s;
-	s << val;
-	
-	tm = 0;
-	s >> tm;
 	return true;
 }
 
