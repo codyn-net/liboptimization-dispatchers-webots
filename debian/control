@@ -1,4 +1,4 @@
-Source: liboptimization0-dispatchers-webots
+Source: liboptimization1-dispatchers-webots
 Priority: extra
 Maintainer: Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>
 Build-Depends: debhelper (>= 7),
@@ -10,7 +10,7 @@ Standards-Version: 3.8.0
 Section: science
 Homepage: http://birg.epfl.ch
 
-Package: liboptimization0-dispatchers-webots
+Package: liboptimization1-dispatchers-webots
 Section: science
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
