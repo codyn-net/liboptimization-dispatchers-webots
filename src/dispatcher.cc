@@ -58,7 +58,7 @@ Dispatcher::Dispatcher()
 	d_pid(0),
 	d_pidBuilder(0)
 {
-	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-0.1/webots.conf");
+	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-1.0/webots.conf");
 }
 
 void
