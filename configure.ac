@@ -1,4 +1,4 @@
-AC_INIT(liboptimization-dispatchers-webots, 1.0)
+AC_INIT(liboptimization-dispatchers-webots, 1.1)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
@@ -16,7 +16,7 @@ AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
 
 PKG_CHECK_MODULES(PACKAGE_DISPATCHERS, [
-	liboptimization-1.0
+	liboptimization-1.0 >= 1.1
 ])
 
 AC_SUBST(PACKAGE_DISPATCHERS_CFLAGS)
