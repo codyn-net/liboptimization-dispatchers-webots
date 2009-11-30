@@ -5,7 +5,7 @@ Build-Depends: debhelper (>= 7),
                autotools-dev,
                cdbs,
                pkg-config,
-               liboptimization-dev
+               liboptimization-dev (>= 1.1)
 Standards-Version: 3.8.0
 Section: science
 Homepage: http://birg.epfl.ch
@@ -13,6 +13,6 @@ Homepage: http://birg.epfl.ch
 Package: liboptimization1-dispatchers-webots
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, liboptimization1 (>= 1.1)
 Description: Optimization webots dispatcher
  Optimization dispatcher for webots simulations
