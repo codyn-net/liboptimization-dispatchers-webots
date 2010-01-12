@@ -309,6 +309,11 @@ Dispatcher::RunTask()
 	// all mount the home directory from NFS
 	f = Glib::file_open_tmp(d_tmpHome, "optimization-home");
 	envp["HOME"] = d_tmpHome;
+
+	string oldhome = "";
+	Environment::variable("OLDHOME", oldhome);
+
+	envp["OLDHOME"] = oldhome;
 	
 	if (f != -1)
 	{
