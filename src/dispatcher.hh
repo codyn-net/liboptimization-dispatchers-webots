@@ -53,6 +53,8 @@ namespace webots
 			bool OnBuilderData(os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
+
+			void KillAll(GPid parent);
 	};
 }
 

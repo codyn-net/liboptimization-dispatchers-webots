@@ -32,6 +32,8 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <optimization/processes.hh>
+
 #include "config.hh"
 
 using namespace std;
@@ -62,21 +64,28 @@ Dispatcher::Dispatcher()
 }
 
 void
+Dispatcher::KillAll(GPid parent)
+{
+	vector<GPid> children = optimization::Processes::Children(parent, true);
+
+	for (vector<GPid>::reverse_iterator iter = children.rbegin(); iter != children.rend(); ++iter)
+	{
+		::kill(*iter, SIGTERM);
+	}
+
+	::kill(parent, SIGTERM);
+
+	// FIXME: should we try to kill everything again with SIGKILL?
+}
+
+void
 Dispatcher::KillWebots()
 {
 	if (d_pidBuilder != 0)
 	{
 		d_builderPipe.readEnd().close();
 
-		// Kill whole process group
-		::kill(-(int)d_pidBuilder, SIGTERM);
-		::kill(d_pidBuilder, SIGTERM);
-		usleep(200000);
-
-		// Kill whole process group
-		::kill(-(int)d_pidBuilder, SIGKILL);
-		::kill(d_pidBuilder, SIGKILL);
-
+		KillAll(d_pidBuilder);
 		d_pidBuilder = 0;
 	}
 
@@ -86,15 +95,7 @@ Dispatcher::KillWebots()
 	}
 
 	cerr << "Killing webots ourselves" << endl;
-
-	// Kill whole process group nicely first
-	::kill(-(int)d_pid, SIGTERM);
-	::kill(d_pid, SIGTERM);
-	usleep(200000);
-	
-	// Then just kill it
-	::kill(-(int)d_pid, SIGKILL);
-	::kill(d_pid, SIGKILL);
+	KillAll(d_pid);
 
 	OnWebotsKilled(d_pid, 0);
 }
