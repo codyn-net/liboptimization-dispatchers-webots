@@ -23,11 +23,9 @@
 
 #include "dispatcher.hh"
 
-#include <os/Environment/environment.hh>
-#include <os/FileSystem/filesystem.hh>
 #include <optimization/messages.hh>
 #include <glibmm.h>
-#include <base/String/string.hh>
+#include <jessevdk/base/base.hh>
 #include <signal.h>
 #include <sys/stat.h>
 #include <pwd.h>
@@ -38,10 +36,10 @@
 
 using namespace std;
 using namespace webots;
-using namespace os;
-using namespace network;
+using namespace jessevdk::os;
+using namespace jessevdk::network;
 using namespace optimization::messages;
-using namespace base;
+using namespace jessevdk::base;
 
 Dispatcher::~Dispatcher()
 {
@@ -83,7 +81,7 @@ Dispatcher::KillWebots()
 {
 	if (d_pidBuilder != 0)
 	{
-		d_builderPipe.readEnd().close();
+		d_builderPipe.ReadEnd().Close();
 
 		KillAll(d_pidBuilder);
 		d_pidBuilder = 0;
@@ -112,7 +110,7 @@ Dispatcher::Mode(string &m) const
 }
 
 bool
-Dispatcher::OnData(os::FileDescriptor::DataArgs &args) 
+Dispatcher::OnData(FileDescriptor::DataArgs &args) 
 {
 	vector<task::Response> response;
 	vector<task::Response>::iterator iter;
@@ -135,23 +133,23 @@ Dispatcher::OnData(os::FileDescriptor::DataArgs &args)
 }
 
 bool
-Dispatcher::OnBuilderData(os::FileDescriptor::DataArgs &args) 
+Dispatcher::OnBuilderData(FileDescriptor::DataArgs &args) 
 {
 	d_builderText += args.data;
 	return false;
 }
 
 bool
-Dispatcher::OnNewConnection(network::Client &connection) 
+Dispatcher::OnNewConnection(Client &connection) 
 {
-	connection.onData().add(*this, &Dispatcher::OnData);
+	connection.OnData().Add(*this, &Dispatcher::OnData);
 	
 	/* Send it the request */
 	string serialized;
 
-	if (optimization::Messages::Create(Request(), serialized))
+	if (optimization::Messages::Create(Task(), serialized))
 	{
-		connection.write(serialized);
+		connection.Write(serialized);
 	}
 	
 	return false;
@@ -171,7 +169,7 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 	cerr << "webots was killed " << pid << " " << ret << endl;
 	Glib::spawn_close_pid(pid);
 	
-	d_server.close();
+	d_server.Close();
 	
 	if (d_timeout)
 	{
@@ -182,13 +180,13 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 	Main()->quit();
 	
 	// Cleanup temporary directory
-	FileSystem::remove(d_tmpHome, true);
-	FileSystem::remove(d_socketFile);
+	FileSystem::Remove(d_tmpHome, true);
+	FileSystem::Remove(d_socketFile);
 	
 	if (d_builderText != "")
 	{
-		FileSystem::remove(String(d_builderText).strip());
-		FileSystem::remove("." + String(d_builderText).strip() + ".project");
+		FileSystem::Remove(String(d_builderText).Strip());
+		FileSystem::Remove("." + String(d_builderText).Strip() + ".project");
 	}
 }
 
@@ -203,15 +201,15 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 	}
 	
 	d_pidBuilder = 0;
-	d_builderPipe.readEnd().close();
+	d_builderPipe.ReadEnd().Close();
 	
 	if (!LaunchWebots())
 	{
-		d_server.close();
+		d_server.Close();
 
 		// Cleanup temporary directory
-		FileSystem::remove(d_tmpHome, true);
-		FileSystem::remove(d_socketFile);
+		FileSystem::Remove(d_tmpHome, true);
+		FileSystem::Remove(d_socketFile);
 
 		Main()->quit();
 	}
@@ -235,7 +233,7 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 	}
 
 	// System webots is fine
-	if (String(ret).startsWith("/usr"))
+	if (String(ret).StartsWith("/usr"))
 	{
 		return ret;
 	}
@@ -257,7 +255,7 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 		cerr << "Custom webots executable is not owned by the user: " << ret << endl;
 		return "";
 	}
-	else if (!String(ret).startsWith(homedir))
+	else if (!String(ret).StartsWith(homedir))
 	{
 		cerr << "Custom webots executable is not in user home directory: " << ret << endl;
 		return "";
@@ -269,7 +267,7 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 }
 
 bool
-Dispatcher::RunTask() 
+Dispatcher::RunTask()
 {
 	int f = Glib::file_open_tmp(d_socketFile, "optimization");
 	
@@ -281,16 +279,16 @@ Dispatcher::RunTask()
 	::close(f);
 	::unlink(d_socketFile.c_str());
 
-	map<string, string> envp = Environment::all();
+	map<string, string> envp = Environment::All();
 	
 	string environment;
 	if (Setting("environment", environment))
 	{
-		vector<string> vars = String(environment).split(",");
+		vector<string> vars = String(environment).Split(",");
 		
 		for (vector<string>::iterator iter = vars.begin(); iter != vars.end(); ++iter)
 		{
-			vector<string> parts = String(*iter).split("=", 2);
+			vector<string> parts = String(*iter).Split("=", 2);
 			
 			if (parts.size() == 2)
 			{
@@ -312,7 +310,7 @@ Dispatcher::RunTask()
 	envp["HOME"] = d_tmpHome;
 
 	string oldhome = "";
-	Environment::variable("OLDHOME", oldhome);
+	Environment::Variable("OLDHOME", oldhome);
 
 	envp["OLDHOME"] = oldhome;
 	
@@ -322,31 +320,31 @@ Dispatcher::RunTask()
 		::unlink(d_tmpHome.c_str());
 	}
 
-	FileSystem::mkdirs(d_tmpHome);
+	FileSystem::Mkdirs(d_tmpHome);
 	
 	// Copy .webotsrc just because that's the nice thing to do
 	string source = Glib::build_filename(Glib::get_home_dir(), ".webotsrc");
 	string dest = Glib::build_filename(d_tmpHome, ".webotsrc");
 
-	FileSystem::copy(source, dest);
+	FileSystem::Copy(source, dest);
 
 	// Copy over .Xauthority
 	source = Glib::build_filename(Glib::get_home_dir(), ".Xauthority");
 	dest = Glib::build_filename(d_tmpHome, ".Xauthority");
 
-	FileSystem::copy(source, dest);
+	FileSystem::Copy(source, dest);
 
 	d_server = UnixServer(d_socketFile);
 	
-	if (!d_server.listen())
+	if (!d_server.Listen())
 	{
 		return false;
 	}
 
-	d_server.onNewConnection().add(*this, &Dispatcher::OnNewConnection);
+	d_server.OnNewConnection().Add(*this, &Dispatcher::OnNewConnection);
 	int serr;
 	
-	d_environment = Environment::convert(envp);
+	d_environment = Environment::Convert(envp);
 	string builder;
 
 	if (ResolveBuilderPath(builder))
@@ -384,7 +382,7 @@ Dispatcher::ResolveBuilderPath(string &builder)
 	}
 
 	// System webots is fine
-	if (String(builder).startsWith("/usr"))
+	if (String(builder).StartsWith("/usr"))
 	{
 		return true;
 	}
@@ -406,7 +404,7 @@ Dispatcher::ResolveBuilderPath(string &builder)
 		cerr << "World builder is not owned by the user: " << builder << endl;
 		return false;
 	}
-	else if (!String(builder).startsWith(homedir))
+	else if (!String(builder).StartsWith(homedir))
 	{
 		cerr << "World builder is not in user home directory: " << builder << endl;
 		return false;
@@ -447,13 +445,13 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	
 	// Write task
 	string serialized;
-	optimization::Messages::Create(Request(), serialized);
+	optimization::Messages::Create(Task(), serialized);
 	
 	d_builderPipe = Pipe(sout, sin);
-	d_builderPipe.readEnd().onData().add(*this, &Dispatcher::OnBuilderData);
+	d_builderPipe.ReadEnd().OnData().Add(*this, &Dispatcher::OnBuilderData);
 	
-	d_builderPipe.writeEnd().write(serialized);
-	d_builderPipe.writeEnd().close();
+	d_builderPipe.WriteEnd().Write(serialized);
+	d_builderPipe.WriteEnd().Close();
 
 	return true;
 }
@@ -556,7 +554,7 @@ Dispatcher::World(string &w) const
 
 	if (d_builderText != "")
 	{
-		set = String(d_builderText).strip();
+		set = String(d_builderText).Strip();
 	}
 	else if (!Setting("world", set))
 	{
@@ -566,7 +564,7 @@ Dispatcher::World(string &w) const
 
 	string resolved;
 	
-	if (!FileSystem::realpath(set, resolved))
+	if (!FileSystem::Realpath(set, resolved))
 	{
 		cerr << "Webots world could not be found: " << set << endl;
 		return false;
@@ -595,7 +593,7 @@ Dispatcher::World(string &w) const
 		cerr << "Webots world is not owned by the user: " << resolved << endl;
 		return false;
 	}
-	else if (!String(resolved).startsWith(home))
+	else if (!String(resolved).StartsWith(home))
 	{
 		cerr << "Webots world is not in user home directory: " << resolved << endl;
 		return false;
