@@ -21,6 +21,8 @@ namespace webots
 		jessevdk::os::Pipe d_builderPipe;
 		std::string d_builderText;
 
+		jessevdk::os::Terminator d_terminator;
+
 		public:
 			Dispatcher();
 			~Dispatcher();
@@ -36,7 +38,10 @@ namespace webots
 			
 		private:
 			/* Private functions */
+			void Kill();
 			void KillWebots();
+			void KillBuilder();
+
 			void OnWebotsKilled(GPid pid, int ret);
 			void OnBuilderKilled(GPid pid, int ret);
 			
@@ -53,7 +58,7 @@ namespace webots
 
 			std::string ResolveWebotsExecutable(std::string const &path);
 
-			void KillAll(GPid parent);
+			void OnTerminated(int status);
 	};
 }
 
