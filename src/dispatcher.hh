@@ -10,8 +10,10 @@ namespace webots
 	class Dispatcher : public optimization::Dispatcher
 	{
 		jessevdk::network::UnixServer d_server;
-		sigc::connection d_timeout;
+		sigc::connection d_pingTimeout;
+		sigc::connection d_killTimeout;
 		Glib::Pid d_pid;
+		bool d_stopping;
 
 		std::string d_socketFile;
 		std::string d_tmpHome;
@@ -22,6 +24,9 @@ namespace webots
 		std::string d_builderText;
 
 		jessevdk::os::Terminator d_terminator;
+
+		static size_t PingTimeoutSeconds;
+		static size_t KillTimeoutSeconds;
 
 		public:
 			Dispatcher();
@@ -49,7 +54,8 @@ namespace webots
 			bool LaunchWorldBuilder(std::string const &builder);
 			bool ResolveBuilderPath(std::string &builder);
 			
-			bool OnTimeout();
+			bool OnKillTimeout();
+			bool OnPingTimeout();
 
 			bool OnData(jessevdk::os::FileDescriptor::DataArgs &args);
 			bool OnNewConnection(jessevdk::network::Client &connection);

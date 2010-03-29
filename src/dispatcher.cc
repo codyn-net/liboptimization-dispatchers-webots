@@ -41,6 +41,9 @@ using namespace jessevdk::network;
 using namespace optimization::messages;
 using namespace jessevdk::base;
 
+size_t Dispatcher::PingTimeoutSeconds = 30;
+size_t Dispatcher::KillTimeoutSeconds = 2;
+
 Dispatcher::~Dispatcher()
 {
 	Kill();
@@ -55,7 +58,8 @@ Dispatcher::Stop()
 Dispatcher::Dispatcher()
 :
 	d_pid(0),
-	d_pidBuilder(0)
+	d_pidBuilder(0),
+	d_stopping(false)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-1.0/webots.conf");
 
@@ -92,6 +96,8 @@ Dispatcher::KillBuilder()
 void
 Dispatcher::Kill()
 {
+	d_stopping = true;
+
 	if (d_pidBuilder != 0)
 	{
 		KillBuilder();
@@ -116,20 +122,34 @@ Dispatcher::Mode(string &m) const
 bool
 Dispatcher::OnData(FileDescriptor::DataArgs &args)
 {
-	vector<task::Response> response;
-	vector<task::Response>::iterator iter;
+	vector<task::Communication> comm;
+	vector<task::Communication>::iterator iter;
 
-	optimization::Messages::Extract(args, response);
+	optimization::Messages::Extract(args, comm);
 
-	for (iter = response.begin(); iter != response.end(); ++iter)
+	for (iter = comm.begin(); iter != comm.end(); ++iter)
 	{
-		WriteResponse(*iter);
-
-		if (!d_timeout)
+		switch (iter->type())
 		{
-			// If we only expect one response, set a timeout just to make
-			// sure we actually kill webots
-			d_timeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnTimeout), 2);
+			case task::Communication::CommunicationResponse:
+				WriteResponse(iter->response());
+
+				if (!d_killTimeout && !d_stopping)
+				{
+					d_killTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnKillTimeout), KillTimeoutSeconds);
+				}
+			break;
+			case task::Communication::CommunicationPing:
+				if (d_pingTimeout)
+				{
+					d_pingTimeout.disconnect();
+				}
+
+				if (!d_killTimeout && d_stopping)
+				{
+					d_pingTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnPingTimeout), PingTimeoutSeconds);
+				}
+			break;
 		}
 	}
 
@@ -148,22 +168,44 @@ Dispatcher::OnNewConnection(Client &connection)
 {
 	connection.OnData().Add(*this, &Dispatcher::OnData);
 
-	/* Send it the request */
+	// Send it the request
+	task::Communication comm;
+	comm.set_type(task::Communication::CommunicationTask);
+
+	*(comm.mutable_task()) = Task();
+
 	string serialized;
 
-	if (optimization::Messages::Create(Task(), serialized))
+	if (optimization::Messages::Create(comm, serialized))
 	{
 		connection.Write(serialized);
+	}
+
+	if (!d_pingTimeout)
+	{
+		d_pingTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnPingTimeout), PingTimeoutSeconds);
 	}
 
 	return false;
 }
 
 bool
-Dispatcher::OnTimeout()
+Dispatcher::OnKillTimeout()
 {
 	// Close webots
 	Kill();
+	return false;
+}
+
+bool
+Dispatcher::OnPingTimeout()
+{
+	// Close webots
+	cerr << "Did not receive ping, fail!" << endl;
+	d_pingTimeout.disconnect();
+
+	Stop();
+
 	return false;
 }
 
@@ -175,9 +217,14 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 
 	d_server.Close();
 
-	if (d_timeout)
+	if (d_pingTimeout)
 	{
-		d_timeout.disconnect();
+		d_pingTimeout.disconnect();
+	}
+
+	if (d_killTimeout)
+	{
+		d_killTimeout.disconnect();
 	}
 
 	d_pid = 0;
@@ -451,7 +498,12 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 
 	// Write task
 	string serialized;
-	optimization::Messages::Create(Task(), serialized);
+	optimization::messages::task::Communication comm;
+
+	comm.set_type(optimization::messages::task::Communication::CommunicationTask);
+	(*comm.mutable_task()) = Task();
+
+	optimization::Messages::Create(comm, serialized);
 
 	d_builderPipe = Pipe(sout, sin);
 	d_builderPipe.ReadEnd().OnData().Add(*this, &Dispatcher::OnBuilderData);
