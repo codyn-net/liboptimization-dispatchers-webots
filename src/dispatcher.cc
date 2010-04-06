@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <sys/types.h>
-#include <optimization/processes.hh>
 
 #include "config.hh"
 
@@ -58,8 +57,8 @@ Dispatcher::Stop()
 Dispatcher::Dispatcher()
 :
 	d_pid(0),
-	d_pidBuilder(0),
-	d_stopping(false)
+	d_stopping(false),
+	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-1.0/webots.conf");
 
@@ -149,6 +148,8 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 				{
 					d_pingTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnPingTimeout), PingTimeoutSeconds);
 				}
+			break;
+			default:
 			break;
 		}
 	}
@@ -395,7 +396,6 @@ Dispatcher::RunTask()
 	}
 
 	d_server.OnNewConnection().Add(*this, &Dispatcher::OnNewConnection);
-	int serr;
 
 	d_environment = Environment::Convert(envp);
 	string builder;
