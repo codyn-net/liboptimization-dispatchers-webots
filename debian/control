@@ -1,18 +1,18 @@
-Source: liboptimization1-dispatchers-webots
+Source: liboptimization2-dispatchers-webots
 Priority: extra
 Maintainer: Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>
 Build-Depends: debhelper (>= 7),
                autotools-dev,
                cdbs,
                pkg-config,
-               liboptimization-dev (>= 1.1)
+               liboptimization2-dev (>= 2.0)
 Standards-Version: 3.8.0
 Section: science
 Homepage: http://birg.epfl.ch
 
-Package: liboptimization1-dispatchers-webots
+Package: liboptimization2-dispatchers-webots
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, liboptimization1 (>= 1.1)
+Depends: ${shlibs:Depends}, ${misc:Depends}, liboptimization2 (>= 2.0)
 Description: Optimization webots dispatcher
  Optimization dispatcher for webots simulations
