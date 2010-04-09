@@ -560,6 +560,10 @@ Dispatcher::LaunchWebots()
 			argv.push_back("--minimize");
 			argv.push_back("--mode=fast");
 		}
+		else if (md == "stop")
+		{
+			argv.push_back("--mode=stop");
+		}
 	}
 	else
 	{
