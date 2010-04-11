@@ -2,25 +2,31 @@
 #define __WEBOTS_DISPATCHER_H__
 
 #include <optimization/dispatcher.hh>
-#include <network/UnixServer/unixserver.hh>
-#include <network/Client/client.hh>
-#include <os/Pipe/pipe.hh>
+#include <jessevdk/network/network.hh>
+#include <jessevdk/os/os.hh>
 
 namespace webots
 {
 	class Dispatcher : public optimization::Dispatcher
 	{
-		network::UnixServer d_server;
-		sigc::connection d_timeout;
+		jessevdk::network::UnixServer d_server;
+		sigc::connection d_pingTimeout;
+		sigc::connection d_killTimeout;
 		Glib::Pid d_pid;
+		bool d_stopping;
 
 		std::string d_socketFile;
 		std::string d_tmpHome;
 		std::vector<std::string> d_environment;
 
 		Glib::Pid d_pidBuilder;
-		os::Pipe d_builderPipe;
+		jessevdk::os::Pipe d_builderPipe;
 		std::string d_builderText;
+
+		jessevdk::os::Terminator d_terminator;
+
+		static size_t PingTimeoutSeconds;
+		static size_t KillTimeoutSeconds;
 
 		public:
 			Dispatcher();
@@ -37,7 +43,10 @@ namespace webots
 			
 		private:
 			/* Private functions */
+			void Kill();
 			void KillWebots();
+			void KillBuilder();
+
 			void OnWebotsKilled(GPid pid, int ret);
 			void OnBuilderKilled(GPid pid, int ret);
 			
@@ -45,14 +54,17 @@ namespace webots
 			bool LaunchWorldBuilder(std::string const &builder);
 			bool ResolveBuilderPath(std::string &builder);
 			
-			bool OnTimeout();
+			bool OnKillTimeout();
+			bool OnPingTimeout();
 
-			bool OnData(os::FileDescriptor::DataArgs &args);
-			bool OnNewConnection(network::Client &connection);
+			bool OnData(jessevdk::os::FileDescriptor::DataArgs &args);
+			bool OnNewConnection(jessevdk::network::Client &connection);
 			
-			bool OnBuilderData(os::FileDescriptor::DataArgs &args);
+			bool OnBuilderData(jessevdk::os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
+
+			void OnTerminated(int status);
 	};
 }
 
