@@ -60,7 +60,7 @@ Dispatcher::Dispatcher()
 	d_stopping(false),
 	d_pidBuilder(0)
 {
-	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-1.0/webots.conf");
+	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
 
 	d_terminator.OnTerminated().Add(*this, &Dispatcher::OnTerminated);
 }
