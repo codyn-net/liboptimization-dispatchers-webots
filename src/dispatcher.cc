@@ -218,6 +218,11 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 
 	d_server.Close();
 
+	if (d_terminator)
+	{
+		d_terminator.Terminated(ret);
+	}
+
 	if (d_pingTimeout)
 	{
 		d_pingTimeout.disconnect();
@@ -252,6 +257,11 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 	if (d_pidBuilder == 0)
 	{
 		return;
+	}
+
+	if (d_terminator)
+	{
+		d_terminator.Terminated(ret);
 	}
 
 	d_pidBuilder = 0;
