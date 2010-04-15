@@ -494,9 +494,9 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 		                  Glib::SPAWN_SEARCH_PATH,
 		                  sigc::slot<void>(),
 		                  &d_pidBuilder,
-				  &sin,
-				  &sout,
-				  0);
+		                  &sin,
+		                  &sout,
+		                  0);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -504,7 +504,7 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 		return false;
 	}
 
-	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnBuilderKilled), d_pidBuilder);
+	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnBuilderKilled), d_pidBuilder, Glib::PRIORITY_LOW);
 
 	// Write task
 	string serialized;
@@ -605,7 +605,7 @@ Dispatcher::LaunchWebots()
 
 	close(serr);
 
-	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid);
+	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid, Glib::PRIORITY_LOW);
 	return true;
 }
 
