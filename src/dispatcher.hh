@@ -63,8 +63,6 @@ namespace webots
 			bool OnBuilderData(jessevdk::os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
-
-			void OnTerminated(int status);
 	};
 }
 
