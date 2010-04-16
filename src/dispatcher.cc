@@ -61,8 +61,6 @@ Dispatcher::Dispatcher()
 	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
-
-	d_terminator.OnTerminated().Add(*this, &Dispatcher::OnTerminated);
 }
 
 void
@@ -218,11 +216,6 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 
 	d_server.Close();
 
-	if (d_terminator)
-	{
-		d_terminator.Terminated(ret);
-	}
-
 	if (d_pingTimeout)
 	{
 		d_pingTimeout.disconnect();
@@ -259,9 +252,9 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 		return;
 	}
 
-	if (d_terminator)
+	if (d_stopping)
 	{
-		d_terminator.Terminated(ret);
+		Main()->quit();
 	}
 
 	d_pidBuilder = 0;
@@ -601,8 +594,6 @@ Dispatcher::LaunchWebots()
 		return false;
 	}
 
-	cerr << "Spawned webots: " << d_pid << endl;
-
 	close(serr);
 
 	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid, Glib::PRIORITY_LOW);
@@ -678,18 +669,5 @@ Dispatcher::World(string &w) const
 	{
 		w = resolved;
 		return true;
-	}
-}
-
-void
-Dispatcher::OnTerminated(int status)
-{
-	if (d_pid != 0)
-	{
-		KillWebots();
-	}
-	else
-	{
-		optimization::Dispatcher::Stop();
 	}
 }
