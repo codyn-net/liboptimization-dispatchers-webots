@@ -12,8 +12,14 @@ nicely_stop(int sig)
 
 int main (int argc, char const* argv[])
 {
-	signal(SIGTERM, nicely_stop);
-	
+	struct sigaction new_action;
+
+	new_action.sa_handler = nicely_stop;
+	sigemptyset (&new_action.sa_mask);
+	new_action.sa_flags = 0;
+
+	sigaction(SIGTERM, &new_action, NULL);
+
 	if (dispatcher_webots.Run())
 	{
 		return 0;
