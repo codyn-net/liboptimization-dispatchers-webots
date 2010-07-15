@@ -1,4 +1,4 @@
-AC_INIT(liboptimization-dispatchers-webots, 2.3)
+AC_INIT(liboptimization-dispatchers-webots, 2.4)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
@@ -18,7 +18,7 @@ AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 PKG_CHECK_MODULES(PACKAGE_DISPATCHERS, [
-	liboptimization-2.0 >= 2.0
+	liboptimization-2.0 >= 2.2
 ])
 
 AC_SUBST(PACKAGE_DISPATCHERS_CFLAGS)
