@@ -209,6 +209,20 @@ Dispatcher::OnPingTimeout()
 }
 
 void
+Dispatcher::Cleanup()
+{
+	// Cleanup temporary directory
+	FileSystem::Remove(d_tmpHome, true);
+	FileSystem::Remove(d_socketFile);
+
+	if (d_builderText != "")
+	{
+		FileSystem::Remove(String(d_builderText).Strip());
+		FileSystem::Remove("." + String(d_builderText).Strip() + ".project");
+	}
+}
+
+void
 Dispatcher::OnWebotsKilled(GPid pid, int ret)
 {
 	cerr << "webots was killed " << pid << " " << ret << endl;
@@ -228,15 +242,7 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 
 	d_pid = 0;
 
-	// Cleanup temporary directory
-	FileSystem::Remove(d_tmpHome, true);
-	FileSystem::Remove(d_socketFile);
-
-	if (d_builderText != "")
-	{
-		FileSystem::Remove(String(d_builderText).Strip());
-		FileSystem::Remove("." + String(d_builderText).Strip() + ".project");
-	}
+	Cleanup();
 
 	// Quit the main loop
 	optimization::Dispatcher::Stop();
@@ -264,9 +270,7 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 	{
 		d_server.Close();
 
-		// Cleanup temporary directory
-		FileSystem::Remove(d_tmpHome, true);
-		FileSystem::Remove(d_socketFile);
+		Cleanup();
 
 		Main()->quit();
 	}
