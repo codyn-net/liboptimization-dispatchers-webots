@@ -21,7 +21,9 @@ namespace webots
 
 		Glib::Pid d_pidBuilder;
 		jessevdk::os::Pipe d_builderPipe;
+		jessevdk::os::FileDescriptor d_builderError;
 		std::string d_builderText;
+		std::string d_builderErrorData;
 
 		jessevdk::os::Terminator d_terminator;
 
@@ -59,8 +61,9 @@ namespace webots
 
 			bool OnData(jessevdk::os::FileDescriptor::DataArgs &args);
 			bool OnNewConnection(jessevdk::network::Client &connection);
-			
+
 			bool OnBuilderData(jessevdk::os::FileDescriptor::DataArgs &args);
+			bool OnBuilderError(jessevdk::os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
 

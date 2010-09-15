@@ -163,6 +163,13 @@ Dispatcher::OnBuilderData(FileDescriptor::DataArgs &args)
 }
 
 bool
+Dispatcher::OnBuilderError(FileDescriptor::DataArgs &args)
+{
+	d_builderErrorData += args.data;
+	return false;
+}
+
+bool
 Dispatcher::OnNewConnection(Client &connection)
 {
 	connection.OnData().Add(*this, &Dispatcher::OnData);
@@ -252,6 +259,11 @@ void
 Dispatcher::OnBuilderKilled(GPid pid, int ret)
 {
 	Glib::spawn_close_pid(pid);
+
+	if (d_builderErrorData != "")
+	{
+		cerr << "Builder error: " << d_builderErrorData << endl;
+	}
 
 	if (d_pidBuilder == 0)
 	{
@@ -481,6 +493,7 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 
 	int sin;
 	int sout;
+	int serr;
 
 	try
 	{
@@ -493,7 +506,7 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 		                  &d_pidBuilder,
 		                  &sin,
 		                  &sout,
-		                  0);
+		                  &serr);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -511,6 +524,10 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	(*comm.mutable_task()) = Task();
 
 	optimization::Messages::Create(comm, serialized);
+
+	d_builderError = FileDescriptor(serr);
+	d_builderError.Attach();
+	d_builderError.OnData().Add(*this, &Dispatcher::OnBuilderError);
 
 	d_builderPipe = Pipe(sout, sin);
 	d_builderPipe.ReadEnd().OnData().Add(*this, &Dispatcher::OnBuilderData);
