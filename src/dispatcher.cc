@@ -684,7 +684,7 @@ Dispatcher::LaunchWebots()
 
 	string ver;
 
-	if (Setting("version", ver))
+	if (Setting("webotsVersion", ver))
 	{
 		config.WebotsVersion = ver;
 	}
@@ -786,6 +786,10 @@ Dispatcher::WebotsPath() const
 	if (Setting("webotsPath", val))
 	{
 		return val;
+	}
+	else if (Setting("webotsVersion", val))
+	{
+		return string("webots") + String(val).Replace(".", "");
 	}
 
 	return "webots";
