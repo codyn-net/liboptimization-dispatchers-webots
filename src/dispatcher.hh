@@ -20,6 +20,8 @@ namespace webots
 			Override(std::string const &value);
 		};
 
+		bool d_hasResponse;
+
 		std::map<std::string, Override> d_overrides;
 
 		jessevdk::network::UnixServer d_server;
@@ -42,6 +44,10 @@ namespace webots
 
 		static size_t PingTimeoutSeconds;
 		static size_t KillTimeoutSeconds;
+
+		jessevdk::os::FileDescriptor d_webotsError;
+		jessevdk::os::FileDescriptor d_webotsOutput;
+		std::string d_webotsOutputData;
 
 		public:
 			Dispatcher();
@@ -77,6 +83,9 @@ namespace webots
 
 			bool OnBuilderData(jessevdk::os::FileDescriptor::DataArgs &args);
 			bool OnBuilderError(jessevdk::os::FileDescriptor::DataArgs &args);
+
+			bool OnWebotsData(jessevdk::os::FileDescriptor::DataArgs &args);
+			bool OnWebotsError(jessevdk::os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
 

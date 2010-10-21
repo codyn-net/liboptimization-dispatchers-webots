@@ -51,11 +51,18 @@ Dispatcher::~Dispatcher()
 void
 Dispatcher::Stop()
 {
+	if (d_webotsOutputData != "")
+	{
+		cerr << d_webotsOutputData << endl;
+		d_webotsOutputData = "";
+	}
+
 	Kill();
 }
 
 Dispatcher::Dispatcher()
 :
+	d_hasResponse(false),
 	d_pid(0),
 	d_stopping(false),
 	d_pidBuilder(0)
@@ -145,6 +152,8 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 		switch (iter->type())
 		{
 			case task::Communication::CommunicationResponse:
+				d_hasResponse = true;
+
 				WriteResponse(iter->response());
 
 				if (!d_killTimeout && !d_stopping)
@@ -168,6 +177,20 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 		}
 	}
 
+	return false;
+}
+
+bool
+Dispatcher::OnWebotsData(FileDescriptor::DataArgs &args)
+{
+	d_webotsOutputData += args.data;
+	return false;
+}
+
+bool
+Dispatcher::OnWebotsError(FileDescriptor::DataArgs &args)
+{
+	d_webotsOutputData += args.data;
 	return false;
 }
 
@@ -248,7 +271,17 @@ Dispatcher::Cleanup()
 void
 Dispatcher::OnWebotsKilled(GPid pid, int ret)
 {
-	cerr << "webots was killed " << pid << " " << ret << endl;
+	if (d_webotsOutputData != "")
+	{
+		cerr << d_webotsOutputData << endl;
+		d_webotsOutputData = "";
+	}
+
+	if (!d_hasResponse)
+	{
+		cerr << "webots was killed without response: " << pid << " " << ret << endl;
+	}
+
 	Glib::spawn_close_pid(pid);
 
 	d_server.Close();
@@ -470,6 +503,10 @@ Dispatcher::RunTask()
 
 	envp["OLDHOME"] = oldhome;
 
+	// Redirect both STDOUT and STDERR so we can pass them along
+	envp["WEBOTS_STDOUT"] = "1";
+	envp["WEBOTS_STDERR"] = "1";
+
 	if (f != -1)
 	{
 		::close(f);
@@ -581,15 +618,15 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	try
 	{
 		Glib::spawn_async_with_pipes(d_tmpHome,
-		                  argv,
-		                  d_environment,
-		                  Glib::SPAWN_DO_NOT_REAP_CHILD |
-		                  Glib::SPAWN_SEARCH_PATH,
-		                  sigc::slot<void>(),
-		                  &d_pidBuilder,
-		                  &sin,
-		                  &sout,
-		                  &serr);
+		                             argv,
+		                             d_environment,
+		                             Glib::SPAWN_DO_NOT_REAP_CHILD |
+		                             Glib::SPAWN_SEARCH_PATH,
+		                             sigc::slot<void>(),
+		                             &d_pidBuilder,
+		                             &sin,
+		                             &sout,
+		                             &serr);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -634,7 +671,6 @@ Dispatcher::LaunchWebots()
 	// Launch webots
 	vector<string> argv;
 	string path = WebotsPath();
-	int serr;
 
 	path = ResolveWebotsExecutable(path);
 
@@ -679,6 +715,9 @@ Dispatcher::LaunchWebots()
 
 	argv.push_back(wd);
 
+	int serr;
+	int sout;
+
 	try
 	{
 		Glib::spawn_async_with_pipes(d_tmpHome,
@@ -689,8 +728,8 @@ Dispatcher::LaunchWebots()
 		                             sigc::slot<void>(),
 		                             &d_pid,
 		                             0,
-		                             &serr,
-		                             0);
+		                             &sout,
+		                             &serr);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -698,7 +737,13 @@ Dispatcher::LaunchWebots()
 		return false;
 	}
 
-	close(serr);
+	d_webotsError = FileDescriptor(serr);
+	d_webotsError.Attach();
+	d_webotsError.OnData().Add(*this, &Dispatcher::OnWebotsError);
+
+	d_webotsOutput = FileDescriptor(sout);
+	d_webotsOutput.Attach();
+	d_webotsOutput.OnData().Add(*this, &Dispatcher::OnWebotsData);
 
 	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid, Glib::PRIORITY_LOW);
 	return true;
