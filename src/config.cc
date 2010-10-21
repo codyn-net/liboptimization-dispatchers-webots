@@ -30,9 +30,17 @@ Config *Config::s_instance = 0;
 
 Config::Config()
 :
-	Secure(true)
+	Secure(false),
+	WebotsVersion("6.1.5"),
+	ForceBatch(false)
 {
 	Register("secure", Secure);
+	Register("webots-version", WebotsVersion);
+	Register("force-batch", ForceBatch);
+
+	d_version[0] = 0;
+	d_version[1] = 0;
+	d_version[2] = 0;
 }
 
 Config &
@@ -51,4 +59,27 @@ Config &
 Config::Instance()
 {
 	return *s_instance;
+}
+
+void
+Config::WebotsNumericVersion(size_t version[3])
+{
+	if (d_version[0] == 0)
+	{
+		vector<string> parts = base::String(WebotsVersion).Split(".");
+
+		if (parts.size() == 3)
+		{
+			for (size_t i = 0; i < 3; ++i)
+			{
+				stringstream s(parts[i]);
+				s >> d_version[i];
+			}
+		}
+	}
+
+	for (size_t i = 0; i < 3; ++i)
+	{
+		version[i] = d_version[i];
+	}
 }

@@ -683,7 +683,11 @@ Dispatcher::LaunchWebots()
 	argv.push_back(path);
 	string md;
 
-	if (Mode(md))
+	bool forceBatch = Config::Instance().ForceBatch;
+	size_t version[3];
+	Config::Instance().WebotsNumericVersion(version);
+
+	if (Mode(md) && !forceBatch)
 	{
 		if (md == "" || md == "run")
 		{
@@ -693,20 +697,36 @@ Dispatcher::LaunchWebots()
 		{
 			argv.push_back("--mode=fast");
 		}
-		else if (md == "batch")
+		else if (md == "batch" || md == "minimize")
 		{
-			argv.push_back("--batch");
-			argv.push_back("--mode=fast");
-		}
-		else if (md == "minimize")
-		{
-			argv.push_back("--minimize");
+			if (version[1] >= 2)
+			{
+				argv.push_back("--minimize");
+			}
+			else
+			{
+				argv.push_back("--batch");
+			}
+
 			argv.push_back("--mode=fast");
 		}
 		else if (md == "stop")
 		{
 			argv.push_back("--mode=stop");
 		}
+	}
+	else if (forceBatch)
+	{
+		if (version[1] >= 2)
+		{
+			argv.push_back("--minimize");
+		}
+		else
+		{
+			argv.push_back("--batch");
+		}
+
+		argv.push_back("--mode=fast");
 	}
 	else
 	{
