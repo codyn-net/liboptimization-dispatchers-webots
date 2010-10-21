@@ -680,12 +680,21 @@ Dispatcher::LaunchWebots()
 		return false;
 	}
 
+	Config &config = Config::Instance();
+
+	string ver;
+
+	if (Setting("version", ver))
+	{
+		config.WebotsVersion = ver;
+	}
+
 	argv.push_back(path);
 	string md;
 
 	bool forceBatch = Config::Instance().ForceBatch;
 	size_t version[3];
-	Config::Instance().WebotsNumericVersion(version);
+	config.WebotsNumericVersion(version);
 
 	if (Mode(md) && !forceBatch)
 	{
