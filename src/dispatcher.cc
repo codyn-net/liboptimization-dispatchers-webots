@@ -68,8 +68,6 @@ Dispatcher::Dispatcher()
 	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
-
-	InitRCOverrides();
 }
 
 Dispatcher::Override::Override()
@@ -465,6 +463,8 @@ Dispatcher::RunTask()
 		return false;
 	}
 
+	InitRCOverrides();
+
 	::close(f);
 	::unlink(d_socketFile.c_str());
 
@@ -859,4 +859,18 @@ Dispatcher::InitRCOverrides()
 {
 	d_overrides["displayWelcomeDialog"] = Override("FALSE");
 	d_overrides["version"] = Override(Config::Instance().WebotsVersion);
+
+	String overrides = Config::Instance().RCOverrides;
+
+	vector<string> parts = overrides.Split(";");
+
+	for (vector<string>::iterator iter = parts.begin(); iter != parts.end(); ++iter)
+	{
+		vector<string> val = String(*iter).Split("=", 2);
+
+		if (val.size() == 2)
+		{
+			d_overrides[val[0]] = Override(val[1]);
+		}
+	}
 }

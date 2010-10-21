@@ -32,11 +32,13 @@ Config::Config()
 :
 	Secure(false),
 	WebotsVersion("6.1.5"),
-	ForceBatch(false)
+	ForceBatch(false),
+	RCOverrides("")
 {
 	Register("secure", Secure);
 	Register("webots-version", WebotsVersion);
 	Register("force-batch", ForceBatch);
+	Register("rc-overrides", RCOverrides);
 
 	d_version[0] = 0;
 	d_version[1] = 0;

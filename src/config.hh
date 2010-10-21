@@ -15,6 +15,7 @@ namespace webots
 			bool Secure;
 			std::string WebotsVersion;
 			bool ForceBatch;
+			std::string RCOverrides;
 
 			/* Constructor/destructor */
 			static Config &Initialize(std::string const &filename);
