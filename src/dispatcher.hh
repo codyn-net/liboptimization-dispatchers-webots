@@ -5,10 +5,23 @@
 #include <jessevdk/network/network.hh>
 #include <jessevdk/os/os.hh>
 
+#include <map>
+
 namespace webots
 {
 	class Dispatcher : public optimization::Dispatcher
 	{
+		struct Override
+		{
+			std::string Value;
+			bool Overridden;
+
+			Override();
+			Override(std::string const &value);
+		};
+
+		std::map<std::string, Override> d_overrides;
+
 		jessevdk::network::UnixServer d_server;
 		sigc::connection d_pingTimeout;
 		sigc::connection d_killTimeout;
@@ -68,6 +81,9 @@ namespace webots
 			std::string ResolveWebotsExecutable(std::string const &path);
 
 			void Cleanup();
+
+			void InitRCOverrides();
+			void PrepareWebotsRC(std::string const &source, std::string const &dest);
 	};
 }
 

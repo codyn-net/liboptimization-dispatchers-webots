@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace webots;
+using namespace jessevdk;
 
 Config *Config::s_instance = 0;
 

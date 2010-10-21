@@ -61,6 +61,22 @@ Dispatcher::Dispatcher()
 	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
+
+	InitRCOverrides();
+}
+
+Dispatcher::Override::Override()
+:
+	Value(""),
+	Overridden(false)
+{
+}
+
+Dispatcher::Override::Override(string const &value)
+:
+	Value(value),
+	Overridden(false)
+{
 }
 
 void
@@ -339,6 +355,73 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 	}
 }
 
+void
+Dispatcher::PrepareWebotsRC(string const &source, string const &dest)
+{
+	fstream instr(source.c_str(), ios::in);
+
+	if (!instr)
+	{
+		instr.open(DATADIR "/liboptimization2-dispatchers-webots/webotsrc", ios::in);
+	}
+
+	if (!instr)
+	{
+		return;
+	}
+
+	fstream outstr(dest.c_str(), ios::out);
+
+	if (!outstr)
+	{
+		return;
+	}
+
+	map<string, Override>::iterator iter;
+
+	for (iter = d_overrides.begin(); iter != d_overrides.end(); ++iter)
+	{
+		iter->second.Overridden = false;
+	}
+
+	string line;
+
+	while (getline(instr, line))
+	{
+		vector<string> parts = String(line).Split(":", 2);
+
+		if (parts.size() == 2)
+		{
+			iter = d_overrides.find(parts[0]);
+
+			if (iter != d_overrides.end())
+			{
+				iter->second.Overridden = true;
+				outstr << parts[0] << ": " << iter->second.Value << endl;
+			}
+			else
+			{
+				outstr << line << endl;
+			}
+		}
+		else
+		{
+			outstr << line << endl;
+		}
+	}
+
+	for (iter = d_overrides.begin(); iter != d_overrides.end(); ++iter)
+	{
+		if (!iter->second.Overridden)
+		{
+			outstr << iter->first << ": " << iter->second.Value << endl;
+		}
+	}
+
+	outstr.close();
+	instr.close();
+}
+
 bool
 Dispatcher::RunTask()
 {
@@ -395,11 +478,11 @@ Dispatcher::RunTask()
 
 	FileSystem::Mkdirs(d_tmpHome);
 
-	// Copy .webotsrc just because that's the nice thing to do
+	// Copy .webotsrc and override some things
 	string source = Glib::build_filename(Glib::get_home_dir(), ".webotsrc");
 	string dest = Glib::build_filename(d_tmpHome, ".webotsrc");
 
-	FileSystem::Copy(source, dest);
+	PrepareWebotsRC(source, dest);
 
 	// Copy over .Xauthority
 	source = Glib::build_filename(Glib::get_home_dir(), ".Xauthority");
@@ -691,4 +774,11 @@ Dispatcher::World(string &w) const
 		w = resolved;
 		return true;
 	}
+}
+
+void
+Dispatcher::InitRCOverrides()
+{
+	d_overrides["displayWelcomeDialog"] = Override("FALSE");
+	d_overrides["version"] = Override(Config::Instance().WebotsVersion);
 }

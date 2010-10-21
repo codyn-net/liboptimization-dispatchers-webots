@@ -1,0 +1,39 @@
+version:                         6.3.1
+startupMode:                     STOP
+editorFont:                      default
+javaCommand:                     java
+httpProxy:                       
+windowMaximized:                 FALSE
+trialVersion:                    FALSE
+displayWelcomeDialog:            FALSE
+displayLicenseWarnings:          FALSE
+displayBoundingObjects:          FALSE
+displayGlobalCoordinateSystem:   FALSE
+displayContactPoints:            FALSE
+displayDistanceSensorRays:       FALSE
+displayLightSensorRays:          FALSE
+displayConnectorAxes:            FALSE
+displayCameraFrustums:           FALSE
+displayLights:                   FALSE
+projectionMode:                  PERSPECTIVE
+renderingMode:                   WIREFRAME
+disableShadows:                  TRUE
+windowX:                         0
+windowY:                         0
+windowWidth:                     800
+windowHeight:                    600
+webviewPort:                     0
+currentFile:                     /usr/local/webots/resources/worlds/new.wbt
+locale:                          Dutch
+displayServoAxes:                FALSE
+displaySensorRays:               FALSE
+displayDeviceAxes:               FALSE
+coordinateSystemSize:            0.01
+axisSize:                        0.1
+defaultWorldName:                new.wbt
+projectPath:                     /usr/local/webots/resources/
+httpProxyUsername:               
+httpProxyPassword:               
+claimedRights:                   P
+synchronizationTime:             30
+sessionKey:                      -1
