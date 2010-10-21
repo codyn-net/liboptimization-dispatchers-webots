@@ -499,7 +499,7 @@ Dispatcher::RunTask()
 	envp["HOME"] = d_tmpHome;
 
 	string oldhome = "";
-	Environment::Variable("OLDHOME", oldhome);
+	Environment::Variable("HOME", oldhome);
 
 	envp["OLDHOME"] = oldhome;
 
