@@ -27,4 +27,5 @@ AC_SUBST(PACKAGE_DISPATCHERS_LIBS)
 AC_OUTPUT(
 Makefile
 src/Makefile
+data/Makefile
 )
