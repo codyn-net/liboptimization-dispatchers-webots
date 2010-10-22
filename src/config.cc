@@ -31,7 +31,7 @@ Config *Config::s_instance = 0;
 Config::Config()
 :
 	Secure(false),
-	WebotsVersion("6.1.5"),
+	WebotsVersion("6.3.1"),
 	ForceBatch(false),
 	RCOverrides("")
 {
