@@ -28,7 +28,7 @@ EXTRA_DIST = \
 	$(NO_INST_HFILES)
 
 install-exec-hook:
-	$(LN_S) -f $(dispdir)/webots-dispatcher $(dispdir)/webots
+	$(LN_S) -f $(DESTDIR)/$(dispdir)/webots-dispatcher $(DESTDIR)/$(dispdir)/webots
 
 uninstall-hook:
-	$(RM) $(dispdir)/webots
+	$(RM) $(DESTDIR)/$(dispdir)/webots
