@@ -503,10 +503,6 @@ Dispatcher::RunTask()
 
 	envp["OLDHOME"] = oldhome;
 
-	// Redirect both STDOUT and STDERR so we can pass them along
-	envp["WEBOTS_STDOUT"] = "1";
-	envp["WEBOTS_STDERR"] = "1";
-
 	if (f != -1)
 	{
 		::close(f);
@@ -740,6 +736,14 @@ Dispatcher::LaunchWebots()
 	else
 	{
 		argv.push_back("--mode=run");
+	}
+
+	// Redirect both STDOUT and STDERR so we can pass them along, this is
+	// not reliable on < 6.2
+	if (version[1] >= 2)
+	{
+		d_environment.push_back("WEBOTS_STDOUT=1");
+		d_environment.push_back("WEBOTS_STDERR=1");
 	}
 
 	argv.push_back(wd);
