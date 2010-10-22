@@ -18,4 +18,6 @@ Makefile
 Makefile.in
 missing
 webots
+webots-dispatcher
 stamp-h1
+config.log

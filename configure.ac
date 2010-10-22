@@ -1,4 +1,4 @@
-AC_INIT(liboptimization-dispatchers-webots, 2.4)
+AC_INIT(liboptimization-dispatchers-webots, 2.5)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
@@ -12,6 +12,8 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+AC_PROG_LN_S
+AC_PATH_PROG(RM, rm)
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
 
@@ -27,4 +29,5 @@ AC_SUBST(PACKAGE_DISPATCHERS_LIBS)
 AC_OUTPUT(
 Makefile
 src/Makefile
+data/Makefile
 )

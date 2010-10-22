@@ -5,10 +5,25 @@
 #include <jessevdk/network/network.hh>
 #include <jessevdk/os/os.hh>
 
+#include <map>
+
 namespace webots
 {
 	class Dispatcher : public optimization::Dispatcher
 	{
+		struct Override
+		{
+			std::string Value;
+			bool Overridden;
+
+			Override();
+			Override(std::string const &value);
+		};
+
+		bool d_hasResponse;
+
+		std::map<std::string, Override> d_overrides;
+
 		jessevdk::network::UnixServer d_server;
 		sigc::connection d_pingTimeout;
 		sigc::connection d_killTimeout;
@@ -21,12 +36,18 @@ namespace webots
 
 		Glib::Pid d_pidBuilder;
 		jessevdk::os::Pipe d_builderPipe;
+		jessevdk::os::FileDescriptor d_builderError;
 		std::string d_builderText;
+		std::string d_builderErrorData;
 
 		jessevdk::os::Terminator d_terminator;
 
 		static size_t PingTimeoutSeconds;
 		static size_t KillTimeoutSeconds;
+
+		jessevdk::os::FileDescriptor d_webotsError;
+		jessevdk::os::FileDescriptor d_webotsOutput;
+		std::string d_webotsOutputData;
 
 		public:
 			Dispatcher();
@@ -59,10 +80,19 @@ namespace webots
 
 			bool OnData(jessevdk::os::FileDescriptor::DataArgs &args);
 			bool OnNewConnection(jessevdk::network::Client &connection);
-			
+
 			bool OnBuilderData(jessevdk::os::FileDescriptor::DataArgs &args);
+			bool OnBuilderError(jessevdk::os::FileDescriptor::DataArgs &args);
+
+			bool OnWebotsData(jessevdk::os::FileDescriptor::DataArgs &args);
+			bool OnWebotsError(jessevdk::os::FileDescriptor::DataArgs &args);
 
 			std::string ResolveWebotsExecutable(std::string const &path);
+
+			void Cleanup();
+
+			void InitRCOverrides();
+			void PrepareWebotsRC(std::string const &source, std::string const &dest);
 	};
 }
 

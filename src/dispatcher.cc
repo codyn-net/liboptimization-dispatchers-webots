@@ -51,16 +51,37 @@ Dispatcher::~Dispatcher()
 void
 Dispatcher::Stop()
 {
+	if (d_webotsOutputData != "")
+	{
+		cerr << d_webotsOutputData << endl;
+		d_webotsOutputData = "";
+	}
+
 	Kill();
 }
 
 Dispatcher::Dispatcher()
 :
+	d_hasResponse(false),
 	d_pid(0),
 	d_stopping(false),
 	d_pidBuilder(0)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
+}
+
+Dispatcher::Override::Override()
+:
+	Value(""),
+	Overridden(false)
+{
+}
+
+Dispatcher::Override::Override(string const &value)
+:
+	Value(value),
+	Overridden(false)
+{
 }
 
 void
@@ -129,6 +150,8 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 		switch (iter->type())
 		{
 			case task::Communication::CommunicationResponse:
+				d_hasResponse = true;
+
 				WriteResponse(iter->response());
 
 				if (!d_killTimeout && !d_stopping)
@@ -156,9 +179,30 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 }
 
 bool
+Dispatcher::OnWebotsData(FileDescriptor::DataArgs &args)
+{
+	d_webotsOutputData += args.data;
+	return false;
+}
+
+bool
+Dispatcher::OnWebotsError(FileDescriptor::DataArgs &args)
+{
+	d_webotsOutputData += args.data;
+	return false;
+}
+
+bool
 Dispatcher::OnBuilderData(FileDescriptor::DataArgs &args)
 {
 	d_builderText += args.data;
+	return false;
+}
+
+bool
+Dispatcher::OnBuilderError(FileDescriptor::DataArgs &args)
+{
+	d_builderErrorData += args.data;
 	return false;
 }
 
@@ -209,9 +253,33 @@ Dispatcher::OnPingTimeout()
 }
 
 void
+Dispatcher::Cleanup()
+{
+	// Cleanup temporary directory
+	FileSystem::Remove(d_tmpHome, true);
+	FileSystem::Remove(d_socketFile);
+
+	if (d_builderText != "")
+	{
+		FileSystem::Remove(String(d_builderText).Strip());
+		FileSystem::Remove("." + String(d_builderText).Strip() + ".project");
+	}
+}
+
+void
 Dispatcher::OnWebotsKilled(GPid pid, int ret)
 {
-	cerr << "webots was killed " << pid << " " << ret << endl;
+	if (d_webotsOutputData != "")
+	{
+		cerr << d_webotsOutputData << endl;
+		d_webotsOutputData = "";
+	}
+
+	if (!d_hasResponse)
+	{
+		cerr << "webots was killed without response: " << pid << " " << ret << endl;
+	}
+
 	Glib::spawn_close_pid(pid);
 
 	d_server.Close();
@@ -228,15 +296,7 @@ Dispatcher::OnWebotsKilled(GPid pid, int ret)
 
 	d_pid = 0;
 
-	// Cleanup temporary directory
-	FileSystem::Remove(d_tmpHome, true);
-	FileSystem::Remove(d_socketFile);
-
-	if (d_builderText != "")
-	{
-		FileSystem::Remove(String(d_builderText).Strip());
-		FileSystem::Remove("." + String(d_builderText).Strip() + ".project");
-	}
+	Cleanup();
 
 	// Quit the main loop
 	optimization::Dispatcher::Stop();
@@ -246,6 +306,11 @@ void
 Dispatcher::OnBuilderKilled(GPid pid, int ret)
 {
 	Glib::spawn_close_pid(pid);
+
+	if (d_builderErrorData != "")
+	{
+		cerr << "Builder error: " << d_builderErrorData << endl;
+	}
 
 	if (d_pidBuilder == 0)
 	{
@@ -264,9 +329,7 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 	{
 		d_server.Close();
 
-		// Cleanup temporary directory
-		FileSystem::Remove(d_tmpHome, true);
-		FileSystem::Remove(d_socketFile);
+		Cleanup();
 
 		Main()->quit();
 	}
@@ -323,6 +386,73 @@ Dispatcher::ResolveWebotsExecutable(std::string const &path)
 	}
 }
 
+void
+Dispatcher::PrepareWebotsRC(string const &source, string const &dest)
+{
+	fstream instr(source.c_str(), ios::in);
+
+	if (!instr)
+	{
+		instr.open(DATADIR "/liboptimization2-dispatchers-webots/webotsrc", ios::in);
+	}
+
+	if (!instr)
+	{
+		return;
+	}
+
+	fstream outstr(dest.c_str(), ios::out);
+
+	if (!outstr)
+	{
+		return;
+	}
+
+	map<string, Override>::iterator iter;
+
+	for (iter = d_overrides.begin(); iter != d_overrides.end(); ++iter)
+	{
+		iter->second.Overridden = false;
+	}
+
+	string line;
+
+	while (getline(instr, line))
+	{
+		vector<string> parts = String(line).Split(":", 2);
+
+		if (parts.size() == 2)
+		{
+			iter = d_overrides.find(parts[0]);
+
+			if (iter != d_overrides.end())
+			{
+				iter->second.Overridden = true;
+				outstr << parts[0] << ": " << iter->second.Value << endl;
+			}
+			else
+			{
+				outstr << line << endl;
+			}
+		}
+		else
+		{
+			outstr << line << endl;
+		}
+	}
+
+	for (iter = d_overrides.begin(); iter != d_overrides.end(); ++iter)
+	{
+		if (!iter->second.Overridden)
+		{
+			outstr << iter->first << ": " << iter->second.Value << endl;
+		}
+	}
+
+	outstr.close();
+	instr.close();
+}
+
 bool
 Dispatcher::RunTask()
 {
@@ -332,6 +462,8 @@ Dispatcher::RunTask()
 	{
 		return false;
 	}
+
+	InitRCOverrides();
 
 	::close(f);
 	::unlink(d_socketFile.c_str());
@@ -367,7 +499,7 @@ Dispatcher::RunTask()
 	envp["HOME"] = d_tmpHome;
 
 	string oldhome = "";
-	Environment::Variable("OLDHOME", oldhome);
+	Environment::Variable("HOME", oldhome);
 
 	envp["OLDHOME"] = oldhome;
 
@@ -379,11 +511,11 @@ Dispatcher::RunTask()
 
 	FileSystem::Mkdirs(d_tmpHome);
 
-	// Copy .webotsrc just because that's the nice thing to do
+	// Copy .webotsrc and override some things
 	string source = Glib::build_filename(Glib::get_home_dir(), ".webotsrc");
 	string dest = Glib::build_filename(d_tmpHome, ".webotsrc");
 
-	FileSystem::Copy(source, dest);
+	PrepareWebotsRC(source, dest);
 
 	// Copy over .Xauthority
 	source = Glib::build_filename(Glib::get_home_dir(), ".Xauthority");
@@ -477,19 +609,20 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 
 	int sin;
 	int sout;
+	int serr;
 
 	try
 	{
 		Glib::spawn_async_with_pipes(d_tmpHome,
-		                  argv,
-		                  d_environment,
-		                  Glib::SPAWN_DO_NOT_REAP_CHILD |
-		                  Glib::SPAWN_SEARCH_PATH,
-		                  sigc::slot<void>(),
-		                  &d_pidBuilder,
-		                  &sin,
-		                  &sout,
-		                  0);
+		                             argv,
+		                             d_environment,
+		                             Glib::SPAWN_DO_NOT_REAP_CHILD |
+		                             Glib::SPAWN_SEARCH_PATH,
+		                             sigc::slot<void>(),
+		                             &d_pidBuilder,
+		                             &sin,
+		                             &sout,
+		                             &serr);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -507,6 +640,10 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	(*comm.mutable_task()) = Task();
 
 	optimization::Messages::Create(comm, serialized);
+
+	d_builderError = FileDescriptor(serr);
+	d_builderError.Attach();
+	d_builderError.OnData().Add(*this, &Dispatcher::OnBuilderError);
 
 	d_builderPipe = Pipe(sout, sin);
 	d_builderPipe.ReadEnd().OnData().Add(*this, &Dispatcher::OnBuilderData);
@@ -530,7 +667,6 @@ Dispatcher::LaunchWebots()
 	// Launch webots
 	vector<string> argv;
 	string path = WebotsPath();
-	int serr;
 
 	path = ResolveWebotsExecutable(path);
 
@@ -540,10 +676,23 @@ Dispatcher::LaunchWebots()
 		return false;
 	}
 
+	Config &config = Config::Instance();
+
+	string ver;
+
+	if (Setting("webotsVersion", ver))
+	{
+		config.WebotsVersion = ver;
+	}
+
 	argv.push_back(path);
 	string md;
 
-	if (Mode(md))
+	bool forceBatch = Config::Instance().ForceBatch;
+	size_t version[3];
+	config.WebotsNumericVersion(version);
+
+	if (Mode(md) && !forceBatch)
 	{
 		if (md == "" || md == "run")
 		{
@@ -553,14 +702,17 @@ Dispatcher::LaunchWebots()
 		{
 			argv.push_back("--mode=fast");
 		}
-		else if (md == "batch")
+		else if (md == "batch" || md == "minimize")
 		{
-			argv.push_back("--batch");
-			argv.push_back("--mode=fast");
-		}
-		else if (md == "minimize")
-		{
-			argv.push_back("--minimize");
+			if (version[1] >= 2)
+			{
+				argv.push_back("--minimize");
+			}
+			else
+			{
+				argv.push_back("--batch");
+			}
+
 			argv.push_back("--mode=fast");
 		}
 		else if (md == "stop")
@@ -568,12 +720,36 @@ Dispatcher::LaunchWebots()
 			argv.push_back("--mode=stop");
 		}
 	}
+	else if (forceBatch)
+	{
+		if (version[1] >= 2)
+		{
+			argv.push_back("--minimize");
+		}
+		else
+		{
+			argv.push_back("--batch");
+		}
+
+		argv.push_back("--mode=fast");
+	}
 	else
 	{
 		argv.push_back("--mode=run");
 	}
 
+	// Redirect both STDOUT and STDERR so we can pass them along, this is
+	// not reliable on < 6.2
+	if (version[1] >= 2)
+	{
+		d_environment.push_back("WEBOTS_STDOUT=1");
+		d_environment.push_back("WEBOTS_STDERR=1");
+	}
+
 	argv.push_back(wd);
+
+	int serr;
+	int sout;
 
 	try
 	{
@@ -585,8 +761,8 @@ Dispatcher::LaunchWebots()
 		                             sigc::slot<void>(),
 		                             &d_pid,
 		                             0,
-		                             &serr,
-		                             0);
+		                             &sout,
+		                             &serr);
 	}
 	catch (Glib::SpawnError &e)
 	{
@@ -594,7 +770,13 @@ Dispatcher::LaunchWebots()
 		return false;
 	}
 
-	close(serr);
+	d_webotsError = FileDescriptor(serr);
+	d_webotsError.Attach();
+	d_webotsError.OnData().Add(*this, &Dispatcher::OnWebotsError);
+
+	d_webotsOutput = FileDescriptor(sout);
+	d_webotsOutput.Attach();
+	d_webotsOutput.OnData().Add(*this, &Dispatcher::OnWebotsData);
 
 	Glib::signal_child_watch().connect(sigc::mem_fun(*this, &Dispatcher::OnWebotsKilled), d_pid, Glib::PRIORITY_LOW);
 	return true;
@@ -608,6 +790,15 @@ Dispatcher::WebotsPath() const
 	if (Setting("webotsPath", val))
 	{
 		return val;
+	}
+	else if (Setting("webotsVersion", val))
+	{
+		string path = string("webots") + String(val).Replace(".", "");
+
+		if (Glib::find_program_in_path(path) != "")
+		{
+			return path;
+		}
 	}
 
 	return "webots";
@@ -669,5 +860,26 @@ Dispatcher::World(string &w) const
 	{
 		w = resolved;
 		return true;
+	}
+}
+
+void
+Dispatcher::InitRCOverrides()
+{
+	d_overrides["displayWelcomeDialog"] = Override("FALSE");
+	d_overrides["version"] = Override(Config::Instance().WebotsVersion);
+
+	String overrides = Config::Instance().RCOverrides;
+
+	vector<string> parts = overrides.Split(";");
+
+	for (vector<string>::iterator iter = parts.begin(); iter != parts.end(); ++iter)
+	{
+		vector<string> val = String(*iter).Split("=", 2);
+
+		if (val.size() == 2)
+		{
+			d_overrides[val[0]] = Override(val[1]);
+		}
 	}
 }

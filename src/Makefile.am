@@ -11,18 +11,24 @@ INCLUDES = \
 	-DPKGLIBDIR=\""$(pkglibdir)"\"
 
 dispdir = $(prefix)/libexec/liboptimization-dispatchers-2.0
-disp_PROGRAMS = webots
+disp_PROGRAMS = webots-dispatcher
 
-webots_SOURCES = \
+webots_dispatcher_SOURCES = \
 	webots.cc \
 	dispatcher.cc \
 	config.cc
 
-webots_LDFLAGS = $(PACKAGE_DISPATCHERS_LIBS)
+webots_dispatcher_LDFLAGS = $(PACKAGE_DISPATCHERS_LIBS)
 
 NO_INST_HFILES = \
 	dispatcher.hh \
 	config.hh
 
 EXTRA_DIST = \
-	$(NO_INST_HFILES) 
+	$(NO_INST_HFILES)
+
+install-exec-hook:
+	$(LN_S) -f $(DESTDIR)/$(dispdir)/webots-dispatcher $(DESTDIR)/$(dispdir)/webots
+
+uninstall-hook:
+	$(RM) $(DESTDIR)/$(dispdir)/webots
