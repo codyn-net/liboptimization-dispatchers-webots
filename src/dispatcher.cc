@@ -789,7 +789,12 @@ Dispatcher::WebotsPath() const
 	}
 	else if (Setting("webotsVersion", val))
 	{
-		return string("webots") + String(val).Replace(".", "");
+		string path = string("webots") + String(val).Replace(".", "");
+
+		if (Glib::find_program_in_path(path) != "")
+		{
+			return path;
+		}
 	}
 
 	return "webots";
