@@ -1,3 +1,9 @@
+liboptimization2-dispatchers-webots (2.7-1) UNRELEASED; urgency=low
+
+  * New upstream release
+
+ -- Jesse van den Kieboom <jvanden@grijpc10.epfl.ch>  Sun, 24 Oct 2010 15:18:22 +0200
+
 liboptimization2-dispatchers-webots (2.6-1) UNRELEASED; urgency=low
 
   * New upstream release
