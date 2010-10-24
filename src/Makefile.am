@@ -31,4 +31,4 @@ install-exec-hook:
 	(cd $(DESTDIR)/$(dispdir); $(LN_S) -f webots-dispatcher webots)
 
 uninstall-hook:
-	$(RM) $(DESTDIR)/$(dispdir)/webots
+	$(RM) -f $(DESTDIR)/$(dispdir)/webots
