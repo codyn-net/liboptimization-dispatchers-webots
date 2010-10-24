@@ -470,26 +470,6 @@ Dispatcher::RunTask()
 
 	map<string, string> envp = Environment::All();
 
-	string environment;
-	if (Setting("environment", environment))
-	{
-		vector<string> vars = String(environment).Split(",");
-
-		for (vector<string>::iterator iter = vars.begin(); iter != vars.end(); ++iter)
-		{
-			vector<string> parts = String(*iter).Split("=", 2);
-
-			if (parts.size() == 2)
-			{
-				envp[parts[0]] = parts[1];
-			}
-			else if (parts.size() == 1)
-			{
-				envp[parts[0]] = "";
-			}
-		}
-	}
-
 	envp["OPTIMIZATION_UNIX_SOCKET"] = d_socketFile;
 
 	// We make a temporary home directory because there is a race condition
