@@ -4,10 +4,13 @@
 # secure = no
 
 ### The webots version
-# version = 6.1.5
+# webots version = 6.3.1
 
 ### Whether or not to force webots in batch mode
-# force-batch = no
+# force batch = no
 
 ### Webots RC overrides (key1=val1;key2=val2;)
-# rc-overrides =
+# rc overrides =
+
+### Forward output in batch mode
+# forward output = no

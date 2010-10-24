@@ -744,7 +744,7 @@ Dispatcher::LaunchWebots()
 
 	// Redirect both STDOUT and STDERR so we can pass them along, this is
 	// not reliable on < 6.2
-	if (version[1] >= 2 && isbatch)
+	if (version[1] >= 2 && isbatch && config.ForwardOutput)
 	{
 		d_environment.push_back("WEBOTS_STDOUT=1");
 		d_environment.push_back("WEBOTS_STDERR=1");
