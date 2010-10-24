@@ -692,6 +692,8 @@ Dispatcher::LaunchWebots()
 	size_t version[3];
 	config.WebotsNumericVersion(version);
 
+	bool isbatch = false;
+
 	if (Mode(md) && !forceBatch)
 	{
 		if (md == "" || md == "run")
@@ -714,6 +716,7 @@ Dispatcher::LaunchWebots()
 			}
 
 			argv.push_back("--mode=fast");
+			isbatch = true;
 		}
 		else if (md == "stop")
 		{
@@ -732,6 +735,7 @@ Dispatcher::LaunchWebots()
 		}
 
 		argv.push_back("--mode=fast");
+		isbatch = true;
 	}
 	else
 	{
@@ -740,7 +744,7 @@ Dispatcher::LaunchWebots()
 
 	// Redirect both STDOUT and STDERR so we can pass them along, this is
 	// not reliable on < 6.2
-	if (version[1] >= 2)
+	if (version[1] >= 2 && isbatch && config.ForwardOutput)
 	{
 		d_environment.push_back("WEBOTS_STDOUT=1");
 		d_environment.push_back("WEBOTS_STDERR=1");

@@ -16,6 +16,7 @@ namespace webots
 			std::string WebotsVersion;
 			bool ForceBatch;
 			std::string RCOverrides;
+			bool ForwardOutput;
 
 			/* Constructor/destructor */
 			static Config &Initialize(std::string const &filename);
