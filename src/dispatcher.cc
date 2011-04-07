@@ -463,6 +463,15 @@ Dispatcher::RunTask()
 		return false;
 	}
 
+	Config &config = Config::Instance();
+
+	string ver;
+
+	if (Setting("webotsVersion", ver))
+	{
+		config.WebotsVersion = ver;
+	}
+
 	InitRCOverrides();
 
 	::close(f);
@@ -658,17 +667,10 @@ Dispatcher::LaunchWebots()
 
 	Config &config = Config::Instance();
 
-	string ver;
-
-	if (Setting("webotsVersion", ver))
-	{
-		config.WebotsVersion = ver;
-	}
-
 	argv.push_back(path);
 	string md;
 
-	bool forceBatch = Config::Instance().ForceBatch;
+	bool forceBatch = config.ForceBatch;
 	size_t version[3];
 	config.WebotsNumericVersion(version);
 
