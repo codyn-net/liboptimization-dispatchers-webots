@@ -29,6 +29,7 @@ namespace webots
 		sigc::connection d_killTimeout;
 		Glib::Pid d_pid;
 		bool d_stopping;
+		bool d_enablePing;
 
 		std::string d_socketFile;
 		std::string d_tmpHome;
@@ -93,6 +94,8 @@ namespace webots
 
 			void InitRCOverrides();
 			void PrepareWebotsRC(std::string const &source, std::string const &dest);
+
+			bool EnablePing() const;
 	};
 }
 

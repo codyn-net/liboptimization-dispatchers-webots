@@ -65,7 +65,8 @@ Dispatcher::Dispatcher()
 	d_hasResponse(false),
 	d_pid(0),
 	d_stopping(false),
-	d_pidBuilder(0)
+	d_pidBuilder(0),
+	d_enablePing(true)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
 }
@@ -138,6 +139,23 @@ Dispatcher::Mode(string &m) const
 }
 
 bool
+Dispatcher::EnablePing() const
+{
+	string disableping;
+
+	if (Setting("disable-ping", disableping))
+	{
+		return disableping != "yes";
+	}
+	else if (Setting("optiextractor"))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool
 Dispatcher::OnData(FileDescriptor::DataArgs &args)
 {
 	vector<task::Communication> comm;
@@ -165,7 +183,7 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 					d_pingTimeout.disconnect();
 				}
 
-				if (!d_killTimeout && d_stopping)
+				if (!d_killTimeout && !d_stopping && d_enablePing)
 				{
 					d_pingTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnPingTimeout), PingTimeoutSeconds);
 				}
@@ -224,7 +242,7 @@ Dispatcher::OnNewConnection(Client &connection)
 		connection.Write(serialized);
 	}
 
-	if (!d_pingTimeout)
+	if (!d_pingTimeout && d_enablePing)
 	{
 		d_pingTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnPingTimeout), PingTimeoutSeconds);
 	}
@@ -731,6 +749,9 @@ Dispatcher::LaunchWebots()
 		d_environment.push_back("WEBOTS_STDOUT=1");
 		d_environment.push_back("WEBOTS_STDERR=1");
 	}
+
+	// Store whether or not to enable the ping
+	d_enablePing = EnablePing();
 
 	argv.push_back(wd);
 
