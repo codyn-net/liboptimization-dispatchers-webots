@@ -66,7 +66,8 @@ Dispatcher::Dispatcher()
 	d_pid(0),
 	d_stopping(false),
 	d_pidBuilder(0),
-	d_enablePing(true)
+	d_enablePing(true),
+	d_hasBuilder(false)
 {
 	Config::Initialize(PREFIXDIR "/libexec/liboptimization-dispatchers-2.0/webots.conf");
 }
@@ -168,14 +169,28 @@ Dispatcher::OnData(FileDescriptor::DataArgs &args)
 		switch (iter->type())
 		{
 			case task::Communication::CommunicationResponse:
+			{
 				d_hasResponse = true;
 
-				WriteResponse(iter->response());
+				task::Response resp = iter->response();
+
+				if (d_hasBuilder)
+				{
+					task::Response::Fitness *fit;
+
+					fit = resp.add_fitness();
+
+					fit->set_name("worldbuilder");
+					fit->set_value(1);
+				}
+
+				WriteResponse(resp);
 
 				if (!d_killTimeout && !d_stopping)
 				{
 					d_killTimeout = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &Dispatcher::OnKillTimeout), KillTimeoutSeconds);
 				}
+			}
 			break;
 			case task::Communication::CommunicationPing:
 				if (d_pingTimeout)
@@ -337,19 +352,42 @@ Dispatcher::OnBuilderKilled(GPid pid, int ret)
 
 	if (d_stopping)
 	{
-		Main()->quit();
+		optimization::Dispatcher::Stop();
 	}
 
 	d_pidBuilder = 0;
 	d_builderPipe.ReadEnd().Close();
 
-	if (!LaunchWebots())
+	if (WEXITSTATUS (ret) != 0)
 	{
 		d_server.Close();
-
 		Cleanup();
 
-		Main()->quit();
+		task::Response response;
+
+		response.set_id(Task().id());
+		response.set_status(task::Response::Success);
+		response.set_uniqueid(Task().uniqueid());
+
+		task::Response::Fitness *fit = response.add_fitness();
+
+		fit->set_name("worldbuilder");
+		fit->set_value(0);
+
+		WriteResponse(response);
+
+		optimization::Dispatcher::Stop();
+	}
+	else
+	{
+		if (!LaunchWebots())
+		{
+			d_server.Close();
+
+			Cleanup();
+
+			optimization::Dispatcher::Stop();
+		}
 	}
 }
 
@@ -617,6 +655,8 @@ Dispatcher::LaunchWorldBuilder(string const &builder)
 	int sin;
 	int sout;
 	int serr;
+
+	d_hasBuilder = true;
 
 	try
 	{
