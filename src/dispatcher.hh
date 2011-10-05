@@ -50,6 +50,8 @@ namespace webots
 		jessevdk::os::FileDescriptor d_webotsOutput;
 		std::string d_webotsOutputData;
 
+		bool d_hasBuilder;
+
 		public:
 			Dispatcher();
 			~Dispatcher();
