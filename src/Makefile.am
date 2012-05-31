@@ -18,6 +18,8 @@ webots_dispatcher_SOURCES = \
 	dispatcher.cc \
 	config.cc
 
+webots_dispatcher_CXXFLAGS = "-Wl,--no-as-needed"
+
 webots_dispatcher_LDFLAGS = $(PACKAGE_DISPATCHERS_LIBS)
 
 NO_INST_HFILES = \
