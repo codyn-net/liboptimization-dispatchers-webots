@@ -5,7 +5,8 @@ Build-Depends: debhelper (>= 7),
                autotools-dev,
                cdbs,
                pkg-config,
-               liboptimization2-dev (>= 2.3)
+               liboptimization2-dev (>= 2.3),
+               libtool
 Standards-Version: 3.8.0
 Section: science
 Homepage: http://birg.epfl.ch

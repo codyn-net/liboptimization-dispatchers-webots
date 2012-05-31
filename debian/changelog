@@ -1,3 +1,10 @@
+liboptimization2-dispatchers-webots (2.12-1) precise; urgency=low
+
+  * Fixed compilation issue with g++ 4.6.3
+  * New upstream version 2.12
+
+ -- Alexandre Tuleu <alexandre.tuleu.2005@polytechnique.org>  Thu, 31 May 2012 18:37:27 +0200
+
 liboptimization2-dispatchers-webots (2.11-1) UNRELEASED; urgency=low
 
   * New upstream release
