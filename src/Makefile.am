@@ -29,7 +29,7 @@ NO_INST_HFILES = \
 EXTRA_DIST = \
 	$(NO_INST_HFILES)
 
-install-exec-hook:
+install-data-hook:
 	(cd $(DESTDIR)/$(dispdir); $(LN_S) -f webots-dispatcher webots)
 
 uninstall-hook:
