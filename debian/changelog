@@ -1,3 +1,10 @@
+liboptimization2-dispatchers-webots (2.14-1) UNRELEASED; urgency=low
+
+  * New upstream release
+  * Link against latest libjessevdk
+
+ -- Jesse van den Kieboom <jesse.vandenkieboom@epfl.ch>  Mon, 18 Mar 2013 09:35:19 +0100
+
 liboptimization2-dispatchers-webots (2.13-1) UNRELEASED; urgency=low
 
   * New upstream release
